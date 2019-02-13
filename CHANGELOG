@@ -1,0 +1,11 @@
+
+Change Log
+==========
+
+[0.1.0]- (unreleased)
+---------------------
+
+Added
+^^^^^
+- initial commit of repo
+- created basic boolean syntax parser using pyparsing for words and logic expressions
