@@ -9,3 +9,9 @@ Added
 ^^^^^
 - initial commit of repo
 - created basic boolean syntax parser using pyparsing for words and logic expressions
+- added sqlalchemy mixin to filter a parsed string into a sqlalchemy filter
+
+Changed
+^^^^^^^
+- changing global params dictionary to a list; compared to original sqlalchemy_boolean_search code
+

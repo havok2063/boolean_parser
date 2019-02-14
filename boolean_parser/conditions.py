@@ -7,12 +7,16 @@
 # Created: Wednesday, 13th February 2019 1:27:16 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Wednesday, 13th February 2019 6:31:01 pm
+# Last Modified: Thursday, 14th February 2019 5:26:54 pm
 # Modified By: Brian Cherinka
 
 
 from __future__ import print_function, division, absolute_import
 import pyparsing as pp
+
+#
+# Parsing Action classses
+#
 
 
 class BooleanClause(object):
@@ -20,12 +24,28 @@ class BooleanClause(object):
     def __init__(self, data):
         self.data = data[0].asDict()
 
+        # parse the basic parameter name
+        self._parse_parameter_name()
+        
+    def _parse_parameter_name(self):
+        ''' parse the parameter name into a base + name '''
+        name = self.data.get('parameter', None)
+        assert name.count('.') <= 1, f'parameter {name} cannot have more than one . '
+        if '.' in name:
+            self.base, self.name = name.split('.', 1)
+        else:
+            self.base = None
+            self.name = name
+
+    @property
+    def fullname(self):
+        return f'{self.base}.{self.name}' if self.base else self.name
+
 
 class Word(BooleanClause):
     ''' Class to handle word clauses '''
     def __init__(self, data):
         super(Word, self).__init__(data)
-        self.name = self.data.get('word', None)
 
     def __repr__(self):
         return f'{self.name}'
@@ -36,22 +56,13 @@ class Condition(BooleanClause):
     def __init__(self, data):
         super(Condition, self).__init__(data) 
 
-        self._parse_parameter_name()
+        # extract the conditional operator and value
         self.operator = self.data.get('operator', None)
         self._extract_values()
 
     def __repr__(self):
         more = 'and' + self.value2 if hasattr(self, 'value2') else ''
         return self.name + self.operator + self.value + more
-
-    def _parse_parameter_name(self):
-        ''' parse the parameter name into a base + name '''
-        self.fullname = self.data.get('parameter', None)
-        if '.' in self.fullname:
-            self.base, self.name = self.fullname.split('.', 1)
-        else:
-            self.base = None
-            self.name = self.fullname
             
     def _extract_values(self):
         ''' Extract the value or values from the condition '''
@@ -84,24 +95,38 @@ class Condition(BooleanClause):
 
         return value
 
+#
+# Boolean Precendent Actions
+#
+
 
 class BaseBool(object):
+
     def __init__(self):
-        self.params = {}
         self.logicop = None
 
-    def _update_params(self, condition):
-        ''' update the parameters dictionary '''
-        if isinstance(condition, BooleanClause) and condition.name not in self.params:
-            self.params.update({condition.fullname: condition.value})
+    # def _update_params(self, condition):
+    #     ''' update the parameters dictionary '''
+    #     if isinstance(condition, BooleanClause) and condition.fullname not in self.params:
+    #         self.params.append(condition.fullname)
 
     def _get_conditions(self, data):
         ''' build the list of conditions '''
         self.conditions = []
         for condition in data:
             if condition and condition != self.logicop:
-                self._update_params(condition)
+                #self._update_params(condition)
                 self.conditions.append(condition)
+
+    @property
+    def params(self):
+        params = []
+        for condition in self.conditions:
+            if isinstance(condition, BaseBool):
+                params.extend(condition.params)
+            else:
+                params.append(condition.fullname)
+        return list(set(params))
 
 
 class BoolNot(BaseBool):
@@ -109,11 +134,14 @@ class BoolNot(BaseBool):
     def __init__(self, data):
         super(BoolNot, self).__init__()
         self.logicop = 'not'
-        self.condition = data[0][1]
-        self._update_params(self.condition)
+        #self.condition = data[0][1]
+        #self._update_params(self.condition)
+        self._get_conditions(data[0])
 
     def __repr__(self):
-        return f'not_({repr(self.condition)})'
+        strcond = ', '.join([repr(c) for c in self.conditions])
+        return f'not_({strcond})'
+        #return f'not_({repr(self.condition)})'
 
 
 class BoolAnd(BaseBool):
@@ -142,7 +170,7 @@ class BoolOr(BaseBool):
 
 # ------
 # define base parser for words
-word = pp.Word(pp.alphas).setResultsName('word')
+word = pp.Word(pp.alphas).setResultsName('parameter')
 words = pp.Group(word).setResultsName('words')
 words.setParseAction(Word)
 

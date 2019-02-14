@@ -7,7 +7,7 @@
 # Created: Wednesday, 13th February 2019 3:49:07 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Wednesday, 13th February 2019 5:59:17 pm
+# Last Modified: Thursday, 14th February 2019 5:29:56 pm
 # Modified By: Brian Cherinka
 
 
@@ -135,6 +135,54 @@ class SQLAMixin(object):
         # Prepare field and value
         lower_field, lower_value, lower_value_2 = self._bind_and_lower_value(field)
 
+        # Handle postgresql arrays if any
+        if isinstance(field.type, postgresql.ARRAY):
+            condition = field.any(self.value, operator=opdict[self.op])
+            return condition
+        
+        # Handle scalar values
+
+        # Return SQLAlchemy condition based on operator value
+        # self.name is parameter name, lower_field is Table.parameterName
+        if self.op == '==':
+            condition = lower_field.__eq__(lower_value)
+        elif self.op == '<':
+            condition = lower_field.__lt__(lower_value)
+        elif self.op == '<=':
+            condition = lower_field.__le__(lower_value)
+        elif self.op == '>':
+            condition = lower_field.__gt__(lower_value)
+        elif self.op == '>=':
+            condition = lower_field.__ge__(lower_value)
+        elif self.op == '!=':
+            condition = lower_field.__ne__(lower_value)
+        elif self.op == '=':
+            if isinstance(field.type, sqltypes.TEXT) or \
+                isinstance(field.type, sqltypes.VARCHAR) or \
+                isinstance(field.type, sqltypes.String):
+                # this operator maps to LIKE
+                # x=5 -> x LIKE '%5%' (x contains 5)
+                # x=5* -> x LIKE '5%' (x starts with 5)
+                # x=*5 -> x LIKE '%5' (x ends with 5)
+                field = getattr(model, self.name)
+                value = self.value
+                if value.find('*') >= 0:
+                    value = value.replace('*', '%')
+                    condition = field.ilike(
+                        bindparam(self.bindname, value))
+                else:
+                    condition = field.ilike(
+                        '%' + bindparam(self.bindname, value) + '%')
+            else:
+                # if not a text column, then use "=" as a straight equals
+                condition = lower_field.__eq__(lower_value)
+        elif self.op == 'between':
+            # between condition
+            condition = between(lower_field, lower_value, lower_value_2)
+        elif self.op in ['&', '|']:
+            # bitwise operations
+            condition = lower_field.op(self.op)(lower_value) > 0
+
         return condition
 
     def _bind_and_lower_value(self, field):
@@ -152,25 +200,13 @@ class SQLAMixin(object):
             value2, lower_field = self._format_value(self.value2, fieldtype, field)
 
         # bind the parameter value to the parameter name
-        boundvalue = bindparam(self.bindname, value)
+        boundvalue = bindparam(self.fullname, value, unique=True)
         lower_value = func.lower(boundvalue) if fieldtype not in ftypes else boundvalue
         if hasattr(self, 'value2'):
-            self.bindname = '{0}_{1}'.format(self.fullname, 2)
-            boundvalue2 = bindparam(self.bindname, value2)
+            boundvalue2 = bindparam(self.fullname, value2, unique=True)
             lower_value_2 = func.lower(boundvalue2) if fieldtype not in ftypes else boundvalue2
 
         return lower_field, lower_value, lower_value_2
-
-    def _bind_parameter_names(self):
-        ''' Bind the parameters names to the values '''
-
-        if self.fullname not in params:
-            params.update({self.fullname: self.value})
-            self.bindname = self.fullname
-        else:
-            count = list(params.keys()).count(self.fullname)
-            self.bindname = '{0}_{1}'.format(self.fullname, count)
-            params.update({self.fullname: self.value})
             
     def _format_value(self, value, fieldtype, field):
         ''' Formats the value based on the fieldtype
@@ -233,15 +269,16 @@ class SQLANot(BoolNot):
     ''' SQLalchemy class for Boolean Not '''
 
     def filter(self, modelclass):
-        return not_(self.condition.filter(modelclass))
-
+        #return not_(self.condition.filter(modelclass))
+        conditions = [condition.filter(modelclass) for condition in self.conditions]
+        return not_(*conditions)
 
 class SQLAAnd(BoolAnd):
     ''' SQLalchemy class for Boolean And '''
 
     def filter(self, modelclass):
         conditions = [condition.filter(modelclass) for condition in self.conditions]
-        return and_(*conditions) 
+        return and_(*conditions)
 
 
 class SQLAOr(BoolOr):
