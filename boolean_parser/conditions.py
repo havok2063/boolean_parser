@@ -7,7 +7,7 @@
 # Created: Wednesday, 13th February 2019 1:27:16 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Thursday, 14th February 2019 5:26:54 pm
+# Last Modified: Friday, 15th February 2019 3:23:48 pm
 # Modified By: Brian Cherinka
 
 
@@ -43,7 +43,11 @@ class BooleanClause(object):
 
 
 class Word(BooleanClause):
-    ''' Class to handle word clauses '''
+    ''' Class to handle word clauses
+
+    example: alpha and beta or not charlie
+
+    '''
     def __init__(self, data):
         super(Word, self).__init__(data)
 
@@ -52,7 +56,11 @@ class Word(BooleanClause):
 
 
 class Condition(BooleanClause):
-    ''' Class to handle logical expression clauses '''
+    ''' Class to handle logical expression clauses
+
+    example: x > 5 and y < 3
+
+    '''
     def __init__(self, data):
         super(Condition, self).__init__(data) 
 

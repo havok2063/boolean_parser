@@ -7,21 +7,23 @@
 # Created: Wednesday, 13th February 2019 3:49:07 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Thursday, 14th February 2019 5:29:56 pm
+# Last Modified: Friday, 15th February 2019 4:08:50 pm
 # Modified By: Brian Cherinka
 
 
 from __future__ import print_function, division, absolute_import
 import inspect
 import decimal
+import pyparsing as pp
 from sqlalchemy import func, bindparam, text
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import or_, and_, not_, sqltypes, between
 from operator import le, ge, gt, lt, eq, ne
 
-from boolean_parser import BooleanParserException
-from boolean_parser.conditions import Condition, BoolNot, BoolOr, BoolAnd
+from boolean_parser.parser import BooleanParserException
+from boolean_parser.conditions import Condition, BoolNot, BoolOr, BoolAnd, BaseBool
+from boolean_parser.conditions import condition, between_cond
 
 opdict = {'<=': le, '>=': ge, '>': gt, '<': lt, '!=': ne, '==': eq, '=': eq}
 
@@ -265,25 +267,36 @@ class SQLACondition(SQLAMixin, Condition):
     pass
 
 
-class SQLANot(BoolNot):
+
+class SQLBoolBase(BaseBool):
+
+    def filter(self, modelclass):
+        conditions = [condition.filter(modelclass) for condition in self.conditions]
+        return self._sqlaop(*conditions)
+
+
+class SQLANot(BoolNot, SQLBoolBase):
     ''' SQLalchemy class for Boolean Not '''
+    _sqlaop = not_
 
-    def filter(self, modelclass):
-        #return not_(self.condition.filter(modelclass))
-        conditions = [condition.filter(modelclass) for condition in self.conditions]
-        return not_(*conditions)
 
-class SQLAAnd(BoolAnd):
+class SQLAAnd(BoolAnd, SQLBoolBase):
     ''' SQLalchemy class for Boolean And '''
-
-    def filter(self, modelclass):
-        conditions = [condition.filter(modelclass) for condition in self.conditions]
-        return and_(*conditions)
+    _sqlaop = and_
 
 
-class SQLAOr(BoolOr):
+class SQLAOr(BoolOr, SQLBoolBase):
     ''' SQLalchemy class for Boolean Or '''
+    _sqlaop = or_
 
-    def filter(self, modelclass):
-        conditions = [condition.filter(modelclass) for condition in self.conditions]
-        return or_(*conditions)
+
+# define new expression
+where_exp = pp.Forward()
+where_exp <<= condition | between_cond
+
+# define the boolean logic precedence order
+expr = pp.operatorPrecedence(where_exp, [
+    (pp.CaselessLiteral("not"), 1, pp.opAssoc.RIGHT, SQLANot),
+    (pp.CaselessLiteral("and"), 2, pp.opAssoc.LEFT, SQLAAnd),
+    (pp.CaselessLiteral("or"), 2, pp.opAssoc.LEFT, SQLAOr),
+])
