@@ -7,23 +7,20 @@
 # Created: Wednesday, 13th February 2019 3:49:07 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Friday, 15th February 2019 4:08:50 pm
+# Last Modified: Sunday, 17th February 2019 1:09:47 pm
 # Modified By: Brian Cherinka
 
 
 from __future__ import print_function, division, absolute_import
 import inspect
 import decimal
-import pyparsing as pp
-from sqlalchemy import func, bindparam, text
+from sqlalchemy import func, bindparam
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import or_, and_, not_, sqltypes, between
+from sqlalchemy.sql import sqltypes, between
 from operator import le, ge, gt, lt, eq, ne
-
 from boolean_parser.parser import BooleanParserException
-from boolean_parser.conditions import Condition, BoolNot, BoolOr, BoolAnd, BaseBool
-from boolean_parser.conditions import condition, between_cond
+
 
 opdict = {'<=': le, '>=': ge, '>': gt, '<': lt, '!=': ne, '==': eq, '=': eq}
 
@@ -139,26 +136,26 @@ class SQLAMixin(object):
 
         # Handle postgresql arrays if any
         if isinstance(field.type, postgresql.ARRAY):
-            condition = field.any(self.value, operator=opdict[self.op])
+            condition = field.any(self.value, operator=opdict[self.operator])
             return condition
         
         # Handle scalar values
 
         # Return SQLAlchemy condition based on operator value
         # self.name is parameter name, lower_field is Table.parameterName
-        if self.op == '==':
+        if self.operator == '==':
             condition = lower_field.__eq__(lower_value)
-        elif self.op == '<':
+        elif self.operator == '<':
             condition = lower_field.__lt__(lower_value)
-        elif self.op == '<=':
+        elif self.operator == '<=':
             condition = lower_field.__le__(lower_value)
-        elif self.op == '>':
+        elif self.operator == '>':
             condition = lower_field.__gt__(lower_value)
-        elif self.op == '>=':
+        elif self.operator == '>=':
             condition = lower_field.__ge__(lower_value)
-        elif self.op == '!=':
+        elif self.operator == '!=':
             condition = lower_field.__ne__(lower_value)
-        elif self.op == '=':
+        elif self.operator == '=':
             if isinstance(field.type, sqltypes.TEXT) or \
                 isinstance(field.type, sqltypes.VARCHAR) or \
                 isinstance(field.type, sqltypes.String):
@@ -178,12 +175,12 @@ class SQLAMixin(object):
             else:
                 # if not a text column, then use "=" as a straight equals
                 condition = lower_field.__eq__(lower_value)
-        elif self.op == 'between':
+        elif self.operator == 'between':
             # between condition
             condition = between(lower_field, lower_value, lower_value_2)
-        elif self.op in ['&', '|']:
+        elif self.operator in ['&', '|']:
             # bitwise operations
-            condition = lower_field.op(self.op)(lower_value) > 0
+            condition = lower_field.op(self.operator)(lower_value) > 0
 
         return condition
 
@@ -261,42 +258,3 @@ class SQLAMixin(object):
         else:
             return out
 
-
-class SQLACondition(SQLAMixin, Condition):
-    ''' '''
-    pass
-
-
-
-class SQLBoolBase(BaseBool):
-
-    def filter(self, modelclass):
-        conditions = [condition.filter(modelclass) for condition in self.conditions]
-        return self._sqlaop(*conditions)
-
-
-class SQLANot(BoolNot, SQLBoolBase):
-    ''' SQLalchemy class for Boolean Not '''
-    _sqlaop = not_
-
-
-class SQLAAnd(BoolAnd, SQLBoolBase):
-    ''' SQLalchemy class for Boolean And '''
-    _sqlaop = and_
-
-
-class SQLAOr(BoolOr, SQLBoolBase):
-    ''' SQLalchemy class for Boolean Or '''
-    _sqlaop = or_
-
-
-# define new expression
-where_exp = pp.Forward()
-where_exp <<= condition | between_cond
-
-# define the boolean logic precedence order
-expr = pp.operatorPrecedence(where_exp, [
-    (pp.CaselessLiteral("not"), 1, pp.opAssoc.RIGHT, SQLANot),
-    (pp.CaselessLiteral("and"), 2, pp.opAssoc.LEFT, SQLAAnd),
-    (pp.CaselessLiteral("or"), 2, pp.opAssoc.LEFT, SQLAOr),
-])

@@ -1,13 +1,13 @@
-# !/usr/bin/env python
+## !/usr/bin/env python
 # -*- coding: utf-8 -*-
 # 
-# Filename: parser.py
-# Project: boolean_parser
+# Filename: __init__.py
+# Project: parsers
 # Author: Brian Cherinka
-# Created: Friday, 15th February 2019 3:24:54 pm
+# Created: Sunday, 17th February 2019 12:40:21 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Sunday, 17th February 2019 12:32:56 pm
+# Last Modified: Sunday, 17th February 2019 2:04:22 pm
 # Modified By: Brian Cherinka
 
 
@@ -15,7 +15,8 @@ from __future__ import print_function, division, absolute_import
 import six
 import pyparsing as pp
 from pyparsing import ParseException
-from boolean_parser.conditions import expr, BoolNot, BoolAnd, BoolOr
+from boolean_parser.actions.boolean import BoolNot, BoolAnd, BoolOr
+from boolean_parser.clauses import condition, between_cond, words
 
 
 class BooleanParserException(Exception):
@@ -24,7 +25,6 @@ class BooleanParserException(Exception):
 
 class Parser(object):
     ''' Standard parser class '''
-    _parser = expr
     _bools = [BoolNot, BoolAnd, BoolOr]
 
     def __init__(self, value=None):
@@ -61,17 +61,18 @@ class Parser(object):
 
     def __repr__(self):
         return f'<Parser(input="{self.original_input or ""}")>'
-        
+
     @classmethod
     def build_parser(cls, clauses=None, bools=None):
         ''' Builds a new boolean parser '''
-        
+
         where_exp = pp.Forward()
         where_exp <<= clauses
 
         # extract the Boolean precendent clauses
         bools = bools or cls._bools
-        assert len(bools) == 3, 'there must be a set of "not, and, or" boolean precedent classes'
+        assert len(
+            bools) == 3, 'there must be a set of "not, and, or" boolean precedent classes'
         bnot, band, bor = bools
 
         # build the expression parser
@@ -80,4 +81,9 @@ class Parser(object):
             (pp.CaselessLiteral("and"), 2, pp.opAssoc.LEFT, band),
             (pp.CaselessLiteral("or"), 2, pp.opAssoc.LEFT, bor),
         ])
-        
+
+
+# Build base Parser
+clauses = condition | between_cond | words
+Parser.build_parser(clauses=clauses)
+

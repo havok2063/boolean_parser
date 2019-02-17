@@ -7,7 +7,7 @@
 # Created: Wednesday, 13th February 2019 1:27:16 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Friday, 15th February 2019 3:23:48 pm
+# Last Modified: Sunday, 17th February 2019 12:54:38 pm
 # Modified By: Brian Cherinka
 
 
@@ -109,21 +109,16 @@ class Condition(BooleanClause):
 
 
 class BaseBool(object):
+    logicop = None
 
-    def __init__(self):
-        self.logicop = None
-
-    # def _update_params(self, condition):
-    #     ''' update the parameters dictionary '''
-    #     if isinstance(condition, BooleanClause) and condition.fullname not in self.params:
-    #         self.params.append(condition.fullname)
+    def __init__(self, data):
+        self._get_conditions(data[0])
 
     def _get_conditions(self, data):
         ''' build the list of conditions '''
         self.conditions = []
         for condition in data:
             if condition and condition != self.logicop:
-                #self._update_params(condition)
                 self.conditions.append(condition)
 
     @property
@@ -136,44 +131,24 @@ class BaseBool(object):
                 params.append(condition.fullname)
         return list(set(params))
 
+    def __repr__(self):
+        strcond = ', '.join([repr(c) for c in self.conditions])
+        return f'{self.logicop}_({strcond})'
+
 
 class BoolNot(BaseBool):
     ''' Base class for Boolean Not logic '''
-    def __init__(self, data):
-        super(BoolNot, self).__init__()
-        self.logicop = 'not'
-        #self.condition = data[0][1]
-        #self._update_params(self.condition)
-        self._get_conditions(data[0])
-
-    def __repr__(self):
-        strcond = ', '.join([repr(c) for c in self.conditions])
-        return f'not_({strcond})'
-        #return f'not_({repr(self.condition)})'
+    logicop = 'not'
 
 
 class BoolAnd(BaseBool):
     ''' Base class for Boolean And logic '''
-    def __init__(self, data):
-        super(BoolAnd, self).__init__()
-        self.logicop = 'and'
-        self._get_conditions(data[0])
-
-    def __repr__(self):
-        strcond = ', '.join([repr(c) for c in self.conditions])
-        return f'and_({strcond})'
+    logicop = 'and'
 
 
 class BoolOr(BaseBool):
     ''' Base class for Boolean Or logic '''
-    def __init__(self, data):
-        super(BoolOr, self).__init__()
-        self.logicop = 'or'
-        self._get_conditions(data[0])
-
-    def __repr__(self):
-        strcond = ', '.join([repr(c) for c in self.conditions])
-        return f'or_({strcond})'
+    logicop = 'or'
 
 
 # ------
