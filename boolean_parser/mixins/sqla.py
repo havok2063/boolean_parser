@@ -7,7 +7,7 @@
 # Created: Wednesday, 13th February 2019 3:49:07 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Sunday, 17th February 2019 1:09:47 pm
+# Last Modified: Sunday, 17th February 2019 3:41:15 pm
 # Modified By: Brian Cherinka
 
 
@@ -19,7 +19,7 @@ from sqlalchemy.ext.declarative.api import DeclarativeMeta
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import sqltypes, between
 from operator import le, ge, gt, lt, eq, ne
-from boolean_parser.parser import BooleanParserException
+from boolean_parser.parsers import BooleanParserException
 
 
 opdict = {'<=': le, '>=': ge, '>': gt, '<': lt, '!=': ne, '==': eq, '=': eq}
