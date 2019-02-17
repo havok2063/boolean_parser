@@ -7,14 +7,14 @@
 # Created: Wednesday, 13th February 2019 1:15:25 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Sunday, 17th February 2019 3:40:32 pm
+# Last Modified: Sunday, 17th February 2019 3:44:25 pm
 # Modified By: Brian Cherinka
 
 
 from __future__ import print_function, division, absolute_import
 
 from boolean_parser.parsers import Parser
-from boolean_parser.parsers.sqla import SQLAParser
+from boolean_parser.parsers import SQLAParser
 
 
 def parse(value, base='sqla'):
