@@ -7,7 +7,7 @@
 # Created: Sunday, 17th February 2019 3:43:08 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Sunday, 17th February 2019 3:43:20 pm
+# Last Modified: Friday, 1st March 2019 2:18:11 pm
 # Modified By: Brian Cherinka
 
 
@@ -17,6 +17,7 @@ import pyparsing as pp
 from pyparsing import ParseException
 from boolean_parser.actions.boolean import BoolNot, BoolAnd, BoolOr
 from boolean_parser.clauses import condition, between_cond, words
+from boolean_parser.actions.clause import Condition, Word
 
 
 class BooleanParserException(Exception):
@@ -82,6 +83,11 @@ class Parser(object):
             (pp.CaselessLiteral("or"), 2, pp.opAssoc.LEFT, bor),
         ])
 
+
+# Set parse actions
+words.setParseAction(Word)
+condition.setParseAction(Condition)
+between_cond.setParseAction(Condition)
 
 # Build base Parser
 clauses = condition | between_cond | words
