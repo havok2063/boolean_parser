@@ -1,4 +1,0 @@
-
-pyparsing>=2.2
-sqlalchemy>=1.2
-
