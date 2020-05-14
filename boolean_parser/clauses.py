@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
+#
 # Filename: clauses.py
 # Project: boolean_parser
 # Author: Brian Cherinka

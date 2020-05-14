@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
+#
 # Filename: __init__.py
 # Project: boolean_parser
 # Author: Brian Cherinka
@@ -25,4 +25,4 @@ def parse(value, base='sqla'):
         return SQLAParser(value).parse()
     else:
         return Parser(value).parse()
-        
+

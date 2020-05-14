@@ -1,16 +1,20 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
-# Filename: models.py
+#
+# Filename: conftest.py
 # Project: tests
 # Author: Brian Cherinka
-# Created: Friday, 15th February 2019 2:44:13 pm
+# Created: Thursday, 14th February 2019 6:04:55 pm
 # License: BSD 3-clause "New" or "Revised" License
 # Copyright (c) 2019 Brian Cherinka
-# Last Modified: Friday, 15th February 2019 2:44:49 pm
+# Last Modified: Sunday, 3rd March 2019 4:53:45 pm
 # Modified By: Brian Cherinka
 
 
 from __future__ import print_function, division, absolute_import
 
-from .conftest import _db
+# import some fixtures we might need
+from .models import model_a_factory, model_b_factory
+from .database import session
+
+

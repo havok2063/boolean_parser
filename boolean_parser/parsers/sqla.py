@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
+#
 # Filename: sqla.py
 # Project: parsers
 # Author: Brian Cherinka
@@ -53,10 +53,9 @@ class SQLAParser(Parser):
 
 
 # set new SQLAlchemy parse actions on conditions
-clauses = condition | between_cond
-for clause in clauses:
-    clause.setParseAction(SQLACondition)
-
+condition.setParseAction(SQLACondition)
+between_cond.setParseAction(SQLACondition)
 
 # Build a new SQLA Parser
+clauses = condition | between_cond
 SQLAParser.build_parser(clauses=clauses)
