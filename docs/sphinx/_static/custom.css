@@ -1,0 +1,43 @@
+/* This is the custom CSS for alabaster. The theme does not allow for it to be set differently. */
+
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
+}
+
+.pink {
+  color: pink;
+}
+
+.orange {
+  color: orange;
+}
+
+.purple {
+  color: purple;
+}
+
+a.reference > em {
+  font-style: normal !important;
+}
+
+a.reference > code {
+  font-weight: inherit !important;
+  color: inherit;
+  background-color: inherit;
+}
+
+ul, ol {
+  margin: 0px 0 0px 30px;
+}
+
+a.reference {
+  border-bottom: 0px;
+}
+
+td.field-body > ul > li > em {
+    font-style: normal !important;
+}

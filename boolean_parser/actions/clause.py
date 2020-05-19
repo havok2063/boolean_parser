@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
+#
 # Filename: clause.py
 # Project: actions
 # Author: Brian Cherinka
@@ -18,10 +18,11 @@ from __future__ import print_function, division, absolute_import
 #
 
 
-class BooleanClause(object):
-    ''' Base object representing a boolean clause '''
+class BaseAction(object):
+    ''' Base object representing a clause action '''
 
     def __init__(self, data):
+        self.original_parse = data
         self.data = data[0].asDict()
 
         # parse the basic parameter name
@@ -43,7 +44,7 @@ class BooleanClause(object):
         return f'{self.base}.{self.name}' if self.base else self.name
 
 
-class Word(BooleanClause):
+class Word(BaseAction):
     ''' Class to handle word clauses
 
     example: alpha and beta or not charlie
@@ -57,7 +58,7 @@ class Word(BooleanClause):
         return f'{self.name}'
 
 
-class Condition(BooleanClause):
+class Condition(BaseAction):
     ''' Class to handle logical expression clauses
 
     example: x > 5 and y < 3

@@ -52,10 +52,7 @@ class SQLAParser(Parser):
     _bools = [SQLANot, SQLAAnd, SQLAOr]
 
 
-# set new SQLAlchemy parse actions on conditions
-condition.setParseAction(SQLACondition)
-between_cond.setParseAction(SQLACondition)
-
-# Build a new SQLA Parser
-clauses = condition | between_cond
-SQLAParser.build_parser(clauses=clauses)
+# Set new SQLAlchemy parse actions on conditions and build the Parser
+clauses = [condition, between_cond]
+actions = [SQLACondition, SQLACondition]
+SQLAParser.build_parser(clauses=clauses, actions=actions)

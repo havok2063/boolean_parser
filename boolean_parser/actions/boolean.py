@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
+#
 # Filename: boolean.py
 # Project: actions
 # Author: Brian Cherinka
@@ -14,7 +14,7 @@
 from __future__ import print_function, division, absolute_import
 
 #
-# Boolean Precendent Actions
+# Boolean Precedent Actions
 #
 
 

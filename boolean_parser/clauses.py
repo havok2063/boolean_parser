@@ -34,4 +34,42 @@ condition = pp.Group(name + operator + value).setResultsName('condition')
 # define base parser for between expression
 between_cond = pp.Group(name + pp.CaselessLiteral('between').setResultsName('operator') +
                         value.setResultsName('value1') + pp.CaselessLiteral('and') +
-                        value.setResultsName('value2'))
+                        value.setResultsName('value2')).setResultsName('between_condition')
+
+# -------
+# define base parser for functions
+ppc = pp.pyparsing_common
+
+# parantheses
+LPAR = pp.Suppress('(')
+RPAR = pp.Suppress(')')
+
+# function arguments
+arglist = pp.delimitedList(number | (pp.Word(pp.alphanums + '-_') + pp.NotAny('=')))
+args = pp.Group(arglist).setResultsName('args')
+# function keyword arguments
+key = ppc.identifier() + pp.Suppress('=')
+values = (number | pp.Word(pp.alphas))
+keyval = pp.dictOf(key, values)
+kwarglist = pp.delimitedList(keyval)
+kwargs = pp.Group(kwarglist).setResultsName('kwargs')
+# build generic function
+fxn_args = args + ',' + kwargs | pp.Optional(args, default='') + pp.Optional(kwargs, default='')
+fxn_name = (pp.Word(pp.alphas)).setResultsName('name')
+fxn = pp.Group(fxn_name + LPAR + fxn_args + RPAR).setResultsName('function')
+
+# fxn condition
+fxn_cond = pp.Group(fxn + operator + value).setResultsName('function_condition')
+
+# fxn conditional expression
+function_call = pp.Group(fxn_name + LPAR + condition + RPAR).setResultsName('function_call')
+fxn_expr = pp.Group(function_call + operator + value).setResultsName('function_expression')
+
+# cone fxn conditions
+#cone_cond = copy.copy(fxn)
+#cone_cond.setParseAction(ConeCondition)
+
+# histogram fxn conditions
+#hist_cond = copy.copy(fxn)
+#hist_cond.setParseAction(HistCondition)
+
