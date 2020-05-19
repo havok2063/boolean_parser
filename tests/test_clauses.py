@@ -93,7 +93,7 @@ def test_function(value, exp):
     assert res['function']['kwargs'] == exp['kwargs']
 
 
-@pytest.mark.parametrize('value, exp', [('test(1,2,3,a=3,b=4) > 5', expdata['fxn_condition'])])
+@pytest.mark.parametrize('value, exp', [('test(1,2,3,a=3,b=4) > 5', expdata['fxn_cond'])])
 def test_function_conditional(value, exp):
     res = fxn_cond.parseString(value).asDict()
     assert 'function_condition' in res
@@ -107,7 +107,7 @@ def test_function_conditional(value, exp):
     assert fc['function']['kwargs'] == exp['function']['kwargs']
 
 
-@pytest.mark.parametrize('value, exp', [('test(x > 1) <= 30', expdata['fxn_expression'])])
+@pytest.mark.parametrize('value, exp', [('test(x > 1) <= 30', expdata['fxn_expr'])])
 def test_function_expression(value, exp):
     res = fxn_expr.parseString(value).asDict()
     assert 'function_expression' in res
