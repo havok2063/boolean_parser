@@ -6,8 +6,10 @@ Change Log
 ---------------------
 
 - Initial commit of repo
-- Created basic boolean syntax parser using pyparsing for words and logic expressions
-- Added sqlalchemy mixin to filter a parsed string into a sqlalchemy filter
+- Created basic boolean syntax parser, ``Parser``, using pyparsing for words and logic expressions
+- Added ``sqlalchemy`` mixin to filter a parsed string into a sqlalchemy filter
+- Added ``SQLAParser`` for parsing ``sqlalchemy`` filter strings
+- Added general ``parse`` function
 - Added expanded test suite for general and sqlalchemy parsing
 - Changed global params dictionary to a list; compared to original sqlalchemy_boolean_search code
-
+- Initial documentation
