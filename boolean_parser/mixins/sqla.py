@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
+#
 # Filename: sqla.py
 # Project: mixins
 # Author: Brian Cherinka
@@ -26,14 +26,20 @@ opdict = {'<=': le, '>=': ge, '>': gt, '<': lt, '!=': ne, '==': eq, '=': eq}
 
 
 class SQLAMixin(object):
-    ''' '''
+    ''' A Mixin class to apply SQLAlchemy filter parsing
+
+    This mixin adds a ``filter`` method to the parsed result which converts
+    the parsed string object into an appropriate SQLAlchemy filter condition to be used
+    in SQLAlchemy queries.
+
+    '''
 
     def _check_models(self, classes):
         ''' Check the input modelclass format
-        
+
         Checks if input classes is a module of modelclasses, a list of modelclasses
-        or a single ModelClass and returns a list of ModelClass objects. 
-        
+        or a single ModelClass and returns a list of ModelClass objects.
+
         Parameters:
             classes (object):
                 A ModelClass module, list of models, or single ModelClass
@@ -63,7 +69,7 @@ class SQLAMixin(object):
     def _get_field(self, modelclass, field_name, base_name=None):
         ''' Return a SQLAlchemy attribute from a field name.
 
-        Checks that a given model contains the named field.         
+        Checks that a given model contains the named field.
 
         Parameters:
             modelclass (ModelClass):
@@ -72,7 +78,7 @@ class SQLAMixin(object):
                 The database field name
             base_name (str):
                 The database table name
-        
+
         Returns:
             An SQLA instrumented attribute object
         '''
@@ -87,10 +93,10 @@ class SQLAMixin(object):
             field = getattr(modelclass, field_name, None)
 
         return field
-    
+
     def filter(self, modelclass):
-        ''' Return the condition as an SQLalchemy query condition
-        
+        ''' Return the condition as an SQLalchemy query filter condition
+
         Loops over all models and creates a filter condition for that model
         given the input filter parameters.
 
@@ -101,7 +107,7 @@ class SQLAMixin(object):
         Returns:
             A SQL query filter condition
         '''
- 
+
         assert modelclass is not None, 'No input found'
 
         condition = None
@@ -138,7 +144,7 @@ class SQLAMixin(object):
         if isinstance(field.type, postgresql.ARRAY):
             condition = field.any(self.value, operator=opdict[self.operator])
             return condition
-        
+
         # Handle scalar values
 
         # Return SQLAlchemy condition based on operator value
@@ -206,13 +212,13 @@ class SQLAMixin(object):
             lower_value_2 = func.lower(boundvalue2) if fieldtype not in ftypes else boundvalue2
 
         return lower_field, lower_value, lower_value_2
-            
+
     def _format_value(self, value, fieldtype, field):
         ''' Formats the value based on the fieldtype
-        
+
         Formats the value to proper numreical type and lowercases
         the field for string fields.
-        
+
         Parameters:
             value (str):
                 The conditional value to format
@@ -244,7 +250,7 @@ class SQLAMixin(object):
                 A numeric value to cast to a float or integer
             datatype (object):
                 The numeric cast function.  Can be either float or int.
-        
+
         Returns:
             The value explicitly cast to an integer or float
         '''

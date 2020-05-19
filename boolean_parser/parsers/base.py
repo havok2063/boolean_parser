@@ -26,7 +26,12 @@ class BooleanParserException(Exception):
 
 
 class Parser(object):
-    ''' Standard parser class '''
+    ''' Core Parser class for parsing strings into objects
+
+    A core Parser class that can parse strings into a set of objects
+    based on a defined set of string clause elements, and actions to perform
+    for each clause.
+    '''
     _bools = [BoolNot, BoolAnd, BoolOr]
     _clauses = []
     _clause = None
@@ -40,14 +45,33 @@ class Parser(object):
 
     @property
     def params(self):
+        ''' The extracted parameters from the parsed string '''
         return self._expression.params if self._expression else None
 
     @property
     def conditions(self):
+        ''' The extracted conditions from the parsed string '''
         return self._expression.conditions if self._expression else None
 
     def parse(self, value=None):
-        ''' Parse a string conditional '''
+        ''' Parse a string conditional
+
+        Calls ``parseString`` on the ``pyparsing`` clause element to parse the
+        input string into a ``pyparsing.ParseResults`` object.
+
+        Parameters:
+            value: str
+                The string expression to parse
+
+        Returns:
+            A pyparsing.ParseResults object
+
+        Example:
+            >>> from boolean_parser.parsers import Parser
+            >>> pp = Parser()
+            >>> pp.parse('x > 1')
+            >>> x>1
+        '''
 
         value = value or self.original_input
         assert value is not None, 'There must be some input to parse'
@@ -68,7 +92,42 @@ class Parser(object):
 
     @classmethod
     def build_parser(cls, clauses=None, actions=None, bools=None):
-        ''' Builds a new boolean parser '''
+        ''' Builds a new boolean parser
+
+        Constructs a new boolean Parser class given a set of clauses, actions,
+        and boolean objects. Clauses are individual ``pyparsing`` elements that represent
+        string clauses to pattern match on.  Actions are functions or classes set on each clause
+        element that control how that clause is parsed.  See :ref:`clauses` for
+        the available `pyparsing` clause elements.
+
+        Assigns the default boolean classes, ``[BoolNot, BoolAnd, BoolOr]`` to the
+        ``pyparsing.operatorPrecedence`` such that NOTs->ANDs->ORs.  If ``bools`` is
+        specified instead, uses those object classes to handle boolean logic.  ``bools``
+        must be a list of length 3 containing classes for boolean "not", "and", and "or" logic
+        in that order.
+
+        Parameters:
+            clauses: list
+                A list of pyparsing clause elements
+            actions: list
+                A list of actions to attach to each clause element
+            bools: list
+                A list of Boolean classes to use to handle boolean logic
+
+        Example:
+            >>> from boolean_parser.parsers import Parser
+            >>> from boolean_parser.clauses import condition, words
+            >>> from boolean_parser.actions.clause import Condition, Word
+            >>>
+            >>> # Assign the parsing order precedence for clauses
+            >>> clauses = [condition, words]
+            >>>
+            >>> # Create a list of Actions for each clause in clauses
+            >>> actions = [Condition, Word]
+            >>>
+            >>> # build the Parser with these clauses and actions
+            >>> Parser.build_parser(clauses=clauses, actions=actions)
+        '''
 
         # set clauses and actions
         clauses = clauses or cls._clauses
@@ -79,6 +138,7 @@ class Parser(object):
         if actions:
             cls.set_parse_actions(clauses=clauses, actions=actions)
 
+        # assign the combined clause to the recursive token pattern matcher
         where_exp = pp.Forward()
         where_exp <<= cls._clause
 
@@ -97,6 +157,31 @@ class Parser(object):
 
     @classmethod
     def set_parse_actions(cls, mapping=None, clauses=None, actions=None):
+        ''' Attach actions to a pyparsing clause element
+
+        ``pyparsing`` clause elements can have optional actions set with the
+        ``setParseAction`` which control how each clause is parsed.  This maps a list
+        of actions onto a list of clauses.  If ``mapping`` is used, it must be a list
+        of tuples containing which action to map to which clause.  Otherwise
+        ``clauses`` and ``actions`` must be provided as equal-length lists which contain,
+        for each item, what action(s) to attach to the corresponding clause.
+
+        Parameters:
+            mapping: list of tuples
+                A list of tuples containing a (clause, action) mapping.
+            clauses: list
+                A list of clauses
+            actions: list
+                A list of actions to attach to each clause
+
+        Example:
+            >>> from boolean_parser.parsers import Parser
+            >>> from boolean_parser.clauses import condition, words
+            >>> from boolean_parser.actions.clause import Condition, Word
+            >>> clauses = [condition, words]
+            >>> actions = [Condition, Word]
+            >>> Parser.set_parse_actions(clauses=clauses, actions=actions)
+        '''
         if not mapping:
             assert clauses and actions, 'clauses and actions must both be specified'
             assert isinstance(clauses, list), 'clauses must be a list'
@@ -118,7 +203,17 @@ class Parser(object):
 
     @classmethod
     def build_clause(cls, clauses=None):
-        ''' Build a single clause from a list of clauses using pp.MatchFirst '''
+        ''' Build a single clause from a list of clauses using pp.MatchFirst
+
+        Merges a list of clauses into a single clause using ``pyparsing.MatchFirst``.
+        This is equivalent to "clause = clause1 | clause2 | clause3`.  The clause precedence
+        the Parser uses will be the order they appear in the list.  The default is to use
+        the attached Parser._clauses list.
+
+        Parameters:
+            clauses: list
+                A list of clauses to merge into a single clause
+        '''
         clauses = clauses or cls._clauses
         assert isinstance(clauses, list), 'clauses must be a list'
         clauses = pp.MatchFirst(clauses)
@@ -126,6 +221,13 @@ class Parser(object):
 
     @classmethod
     def set_clauses(cls, clauses):
+        ''' Sets the list of clauses to use
+
+        Parameters:
+            clauses: list
+                A list of clauses to attach to the Parser
+
+        '''
         assert isinstance(clauses, list), 'clauses must be a list'
         cls._clauses = [copy.deepcopy(c) for c in clauses]
 

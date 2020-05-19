@@ -19,7 +19,28 @@ from __future__ import print_function, division, absolute_import
 
 
 class BaseAction(object):
-    ''' Base object representing a clause action '''
+    ''' Base object representing a clause action
+
+    An action to perform after parsing a string clause.  If set, actions run
+    Actions are attached to clauses with the ``setParseAction`` on a given ``pyparsing``
+    element.  ``setParseAction`` accepts a function or class to be applied
+    to the ``pyparsing`` element during the parsing process.  Multiple actions can be attached
+    by passing a list of functions or classes.  This class extracts the parsed data from the
+    ``pyparsing`` element and makes it accessible as a variety of named attributes.
+
+    Attributes:
+        name: str
+            The name of the extracted parameter
+        base: str
+            The base name of the extracted parameter, if any.
+        fullname: str
+            The full name of the extracted parameter as base + name
+        data: dict
+            The extracted parsed parameters from the pyparse clause
+        original_parse: pyparsing.ParseResults
+            The original pyparsed results object
+
+    '''
 
     def __init__(self, data):
         self.original_parse = data
@@ -41,13 +62,16 @@ class BaseAction(object):
 
     @property
     def fullname(self):
+        ''' The full parameter name, including any base '''
         return f'{self.base}.{self.name}' if self.base else self.name
 
 
 class Word(BaseAction):
-    ''' Class to handle word clauses
+    ''' Class action for handling word clauses
 
-    example: alpha and beta or not charlie
+    This action performs a basic word parse.  The basic word
+    is assigned as the ``name`` attribute.  Example word clauses:
+    "alpha" or "alpha and beta or not charlie".
 
     '''
 
@@ -59,9 +83,31 @@ class Word(BaseAction):
 
 
 class Condition(BaseAction):
-    ''' Class to handle logical expression clauses
+    ''' Class action for handling conditional clauses
 
-    example: x > 5 and y < 3
+    This action performs a basic conditional parse.  The syntax for a
+    conditional expressions is defined as "parameter operand value" or
+    for "between" conditions, "parameter between value and value2".  The parameter name,
+    operand, and parameter value is assigned as the ``name``, ``operator``, and
+    ``value`` attribute, respectively.  Example conditional clauses:
+    "x > 5" or "x > 5 and y < 3".  When using a "between" condition, e.g.
+    "x between 3 and 5", an additional ``value2`` attribute is assigned the second
+    parameter value.  For bitwise operands of '&' and '|', the value can also accept a negation
+    prefix, e.g. "x & ~256", which evaluates to "x & -257".
+
+    Allowed operands for conditionals are:
+        '>', '>=, '<', '<=', '==', '=', '!=', '&', '|'
+
+    In addition to the Base Attributes, the ``Condition`` action provides
+    additional attributes containing the parsed condition parameters.
+
+    Attributes:
+        operator: str
+            The operand used in the condition
+        value: str
+            The parameter value in the condition
+        value2: str
+            Optional second value, assigned when a "between" condition is used.
 
     '''
 
@@ -88,14 +134,15 @@ class Condition(BaseAction):
         self.value = self._check_bitwise_value(self.value)
 
     def _check_bitwise_value(self, value):
-        ''' check if value has a bitwise ~ in it
+        ''' Check if value has a bitwise ~ in it
 
         Removes any bitwise ~ found in a value for a condition.
         If the operand is a bitwise & or |, convert the ~value to its
         integer appropriate.  E.g. ~64 -> -65.
 
         Parameters:
-            value (str): A string numerical value
+            value: str
+                A string numerical value
 
         Returns:
             The str value or value converted to the proper bitwise negative

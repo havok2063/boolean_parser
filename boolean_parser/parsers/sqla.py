@@ -24,31 +24,76 @@ sqlaop = {'and': and_, 'not': not_, 'or': or_}
 
 
 class SQLACondition(SQLAMixin, Condition):
-    ''' '''
+    ''' SQLAlchemy Conditional Action
+
+    Subclasses from ``Condition`` and ``SQLAMixin`` to create an
+    action that parses a string that represents a SQLAlchemy filter condition
+    and allows for conversion from the parsed string result to a SQLAlchemy
+    filter object.  For SQLAlchemy conditions, the syntax for a conditon expression
+    is "model_name.parameter operand value" where "model_name.parameter" is a dotted
+    syntax for `ModelClass.parameter` which maps to `dbtable_name.column_name`. For example,
+    given a base ModelClass "ModelA" with parameter "x", the conditional
+    expression "modela.x < 4" parses into
+    "{name: 'x', fullname: 'modela.x', base: 'modela', operator: '<', value: '4'}"
+
+    '''
     pass
 
 
 class SQLBoolBase(BaseBool):
+    ''' Class for handling boolean logic joins for SQLALchemy filter expressions '''
 
     def filter(self, models):
+        ''' Calls the filter method for each condition
+
+        Parameters:
+            models: list
+                A list of SQLAlchemy model bases
+        '''
         conditions = [condition.filter(models)
                       for condition in self.conditions]
         return sqlaop[self.logicop](*conditions)
 
 
 class SQLANot(BoolNot, SQLBoolBase):
-    ''' SQLalchemy class for Boolean Not '''
+    ''' SQLalchemy class for boolean Not '''
 
 
 class SQLAAnd(BoolAnd, SQLBoolBase):
-    ''' SQLalchemy class for Boolean And '''
+    ''' SQLalchemy class for boolean And '''
 
 
 class SQLAOr(BoolOr, SQLBoolBase):
-    ''' SQLalchemy class for Boolean Or '''
+    ''' SQLalchemy class for boolean Or '''
 
 
 class SQLAParser(Parser):
+    ''' A SQLAlchemy boolean parser object
+
+    A Parser class that provides a mechanism for converting a
+    string conditional into a SQLAlchemy filter condition that can
+    be passed into SQLAlchemy queries.  This parser contains a ``filter``
+    method which accepts a list of SQLAlchemy Model classes used to identify
+    and convert the parsed parameter name into a SQLAlchemy Instrumented Attribute.
+
+    Example:
+        >>> from boolean_parser.parsers import SQLAParser
+        >>> from database.models import ModelA
+        >>> from database import session
+        >>>
+        >>> # create the parser and parse a sql condition
+        >>> res = SQLParser('modela.x > 5 and modela.y < 2').parse()
+        >>> res
+        >>> and_(x>5, y<2)
+        >>>
+        >>> # generate the sqlalchemy filter
+        >>> ff = res.filter(ModelA)
+        >>> print(ff.compile(compile_kwargs={'literal_binds': True}))
+        >>> modela.x > 5 AND modela.y < 2
+        >>>
+        >>> # perform the sqlalchemy query
+        >>> session.query(ModelA).filter(ff).all()
+    '''
     _bools = [SQLANot, SQLAAnd, SQLAOr]
 
 

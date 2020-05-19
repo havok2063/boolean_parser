@@ -14,9 +14,10 @@ Contents
 --------
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
   Introduction to boolean_parser <intro>
+  Parser Clause Elements <clauses>
 
 Reference
 ---------
