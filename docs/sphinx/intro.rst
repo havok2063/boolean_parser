@@ -212,10 +212,10 @@ how to build a parser to parse a simple street name.  We'll break this example d
 
     >>> # define the address clause element with pyparsing grammar constructors
     >>> import pyparsing as pp
-    >>> number = pp.Word(pp.nums).setResultsName('street_number')
-    >>> name = pp.Word(pp.alphas).setResultsName('street_name')
-    >>> type = pp.oneOf(['street', 'avenue', 'circle']).setResultsName('street_type')
-    >>> street = pp.Group(number + name + type).setResultsName('street')
+    >>> snumber = pp.Word(pp.nums).setResultsName('street_number')
+    >>> sname = pp.Word(pp.alphas).setResultsName('street_name')
+    >>> stype = pp.oneOf(['street', 'avenue', 'circle']).setResultsName('street_type')
+    >>> street = pp.Group(snumber + sname + stype).setResultsName('street')
 
     >>> # rebuild the Parser with the new street clause
     >>> Parser.build_parser(clauses=[street])
