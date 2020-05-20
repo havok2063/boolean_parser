@@ -312,13 +312,13 @@ Parse Actions
 
 "Parsing Actions" are actions to be performed on a clause element after a successful parsed match.  One or more
 actions can be assigned to each clause element.  When you build a parser, by default there are no special actions
-applied and the parser returns a standard :py:class:`pyparsing.ParseResults`object. This can be overridden by
-providing the ``actions`` keyword argument with a list of actions to assign to each clause elements.  The list
+applied and the parser returns a standard :py:class:`pyparsing.ParseResults` object. This can be overridden by
+providing the ``actions`` keyword argument with a list of actions to assign to each clause element.  The list
 of ``actions`` must be of equal length to the input list of ``clauses``.  Actions can be any callable.  Let's
 define a function action that prints the street name during parsing.
 ::
 
-    >>> define the action function
+    >>> # define the action function
     >>> def print_name(data):
     >>>    print('The street_name is:', data[0].asDict()['street_name'])
 
