@@ -335,7 +335,7 @@ element can be chained together by passing in a list or tuple of actions for eac
 `Street` action to the `print_name` action.
 ::
 
-    >>> define the action class
+    >>> # define the action class
     >>> class Street(object):
     >>>     def __init__(self, data):
     >>>         dd = data[0].asDict()
