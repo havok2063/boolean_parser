@@ -237,16 +237,16 @@ each component and build our "street" clause element.
     >>> import pyparsing as pp
 
     >>> # define a street number as a "word" of any combination of digits 0-9
-    >>> number = pp.Word(pp.nums).setResultsName('street_number')
+    >>> snumber = pp.Word(pp.nums).setResultsName('street_number')
 
     >>> # define the street name as a "word" of any combination of alphabet characters
-    >>> name = pp.Word(pp.alphas).setResultsName('street_name')
+    >>> sname = pp.Word(pp.alphas).setResultsName('street_name')
 
     >>> # define the type of street as one option in a set of choices
-    >>> type = pp.oneOf(['street', 'avenue', 'circle']).setResultsName('street_type')
+    >>> stype = pp.oneOf(['street', 'avenue', 'circle']).setResultsName('street_type')
 
     >>> # group the components together into a final street clause element
-    >>> street = pp.Group(number + name + type).setResultsName('street')
+    >>> street = pp.Group(snumber + sname + stype).setResultsName('street')
 
 We use the :py:meth:`pyparsing.ParserElement.setResultsName` to assign a label to each component.  This helps break up
 complex clauses into easily identifable components, and allows us to use the :py:meth:`pyparsing.ParseResults.asDict`
