@@ -73,3 +73,6 @@ fxn_expr = pp.Group(function_call + operator + value).setResultsName('function_e
 #hist_cond = copy.copy(fxn)
 #hist_cond.setParseAction(HistCondition)
 
+
+# create a list of usable constructed clauses
+available_clauses = [words, condition, between_cond, fxn, fxn_cond, fxn_expr]

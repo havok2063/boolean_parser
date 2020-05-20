@@ -203,7 +203,8 @@ class Parser(object):
             clause, action = item
             assert clause in cls._clauses, 'clause must be included in list of class clauses'
             idx = cls._clauses.index(clause)
-            cls._clauses[idx].setParseAction(action)
+            action = action if isinstance(action, (list, tuple)) else [action]
+            cls._clauses[idx].setParseAction(*action)
 
     @classmethod
     def build_clause(cls, clauses=None):
