@@ -263,7 +263,7 @@ Build the new Parser
 ^^^^^^^^^^^^^^^^^^^^
 
 Now that we have a clause defined, we can use the ``build_parser`` class method on ``Parser`` to contruct a new parser
-class capabable of parsing street names. We pass in the ``street`` clause as a list input to the ``clauses`` keyword
+class capable of parsing street names. We pass in the ``street`` clause as a list input to the ``clauses`` keyword
 argument.
 ::
 
@@ -310,7 +310,7 @@ of the input clauses.
 Parse Actions
 ^^^^^^^^^^^^^
 
-Parsing Actions are actions to be performed on a clause element after a successful parsed match.  One or more
+"Parsing Actions" are actions to be performed on a clause element after a successful parsed match.  One or more
 actions can be assigned to each clause element.  When you build a parser, by default there are no special actions
 applied and the parser returns a standard :py:class:`pyparsing.ParseResults`object. This can be overridden by
 providing the ``actions`` keyword argument with a list of actions to assign to each clause elements.  The list
