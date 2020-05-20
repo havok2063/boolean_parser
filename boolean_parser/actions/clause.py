@@ -37,13 +37,14 @@ class BaseAction(object):
             The full name of the extracted parameter as base + name
         data: dict
             The extracted parsed parameters from the pyparse clause
-        original_parse: :py:class:`pyparsing.ParseResults`
+        parsed_clause: :py:class:`pyparsing.ParseResults`
             The original pyparsed results object
-
+        input_clause: str
+            The original input clause element
     '''
 
     def __init__(self, data):
-        self.original_parse = data
+        self.parsed_clause = data
         self.data = data[0].asDict()
 
         # parse the basic parameter name
@@ -80,6 +81,11 @@ class Word(BaseAction):
 
     def __repr__(self):
         return f'{self.name}'
+
+    @property
+    def input_clause(self):
+        ''' Original input clause as a string '''
+        return f'{self.fullname}'
 
 
 class Condition(BaseAction):
@@ -121,6 +127,14 @@ class Condition(BaseAction):
     def __repr__(self):
         more = 'and' + self.value2 if hasattr(self, 'value2') else ''
         return self.name + self.operator + self.value + more
+
+    @property
+    def input_clause(self):
+        ''' Original input clause as a string '''
+        if self.operator == 'between':
+            return f'{self.fullname} {self.operator} {self.value} and {self.value2}'
+        else:
+            return f'{self.fullname} {self.operator} {self.value}'
 
     def _extract_values(self):
         ''' Extract the value or values from the condition '''

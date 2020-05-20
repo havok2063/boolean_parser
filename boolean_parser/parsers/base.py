@@ -46,11 +46,15 @@ class Parser(object):
     @property
     def params(self):
         ''' The extracted parameters from the parsed string '''
+        if isinstance(self._expression, Condition):
+            return self._expression.fullname if self._expression else None
         return self._expression.params if self._expression else None
 
     @property
     def conditions(self):
         ''' The extracted conditions from the parsed string '''
+        if isinstance(self._expression, Condition):
+            return self._expression if self._expression else None
         return self._expression.conditions if self._expression else None
 
     def parse(self, value=None):

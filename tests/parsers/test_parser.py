@@ -44,3 +44,26 @@ def test_between_condition(value, exp):
     assert res.fullname == 'a'
     assert res.operator == 'between'
     assert isinstance(res, Condition)
+
+
+@pytest.mark.parametrize('value, params',
+                         [('a > 5', ['a']),
+                          ('a > 5 and b < 3', ['a', 'b'])])
+def test_parser_params(value, params):
+    pp = Parser(value)
+    assert set(params) == set(pp.params)
+
+
+@pytest.mark.parametrize('value, conditions',
+                         [('a > 5', 'a>5'),
+                          ('a > 5 and b < 3', ['a>5', 'b<3'])])
+def test_parser_conditions(value, conditions):
+    pp = Parser(value)
+    if not isinstance(conditions, list):
+        assert repr(pp.conditions) == conditions
+        assert isinstance(pp.conditions, Condition)
+    else:
+        assert isinstance(pp.conditions, list)
+        reps = [repr(c) for c in pp.conditions]
+        assert reps == conditions
+        assert isinstance(pp.conditions[0], Condition)
