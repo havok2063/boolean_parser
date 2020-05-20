@@ -101,7 +101,7 @@ class Parser(object):
         the available `pyparsing` clause elements.
 
         Assigns the default boolean classes, ``[BoolNot, BoolAnd, BoolOr]`` to the
-        ``pyparsing.operatorPrecedence`` such that NOTs->ANDs->ORs.  If ``bools`` is
+        :py:func:`pyparsing.infixNotation` such that NOTs->ANDs->ORs.  If ``bools`` is
         specified instead, uses those object classes to handle boolean logic.  ``bools``
         must be a list of length 3 containing classes for boolean "not", "and", and "or" logic
         in that order.
@@ -149,7 +149,7 @@ class Parser(object):
         bnot, band, bor = bools
 
         # build the expression parser
-        cls._parser = pp.operatorPrecedence(where_exp, [
+        cls._parser = pp.infixNotation(where_exp, [
             (pp.CaselessLiteral("not"), 1, pp.opAssoc.RIGHT, bnot),
             (pp.CaselessLiteral("and"), 2, pp.opAssoc.LEFT, band),
             (pp.CaselessLiteral("or"), 2, pp.opAssoc.LEFT, bor),
@@ -205,7 +205,7 @@ class Parser(object):
     def build_clause(cls, clauses=None):
         ''' Build a single clause from a list of clauses using pp.MatchFirst
 
-        Merges a list of clauses into a single clause using ``pyparsing.MatchFirst``.
+        Merges a list of clauses into a single clause using :py:class:`pyparsing.MatchFirst`.
         This is equivalent to "clause = clause1 | clause2 | clause3`.  The clause precedence
         the Parser uses will be the order they appear in the list.  The default is to use
         the attached Parser._clauses list.

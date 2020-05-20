@@ -22,7 +22,7 @@ class BaseBool(object):
     ''' Base class for handling conditions joined by boolean logic operators
 
     This class handles the parsing of boolean logic within strings. The boolean
-    classes are assigned to the ``pyparsing.operatorPrecedence`` in the order of boolean
+    classes are assigned to the :py:func:`pyparsing.infixNotation` in the order of boolean
     NOTS->ANDS->ORS, i.e. ``BoolNot``-> ``BoolAnd``-> ``BoolOr``.  For example,
     the string "x > 1 and y < 2", consisting of two conditions joined by a boolean "and" gets
     parsed into "and_(x>1, y<2)", represented as "BoolAnd(Condition1, Condition2)".

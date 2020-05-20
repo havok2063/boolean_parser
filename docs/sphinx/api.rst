@@ -4,7 +4,17 @@
 boolean_parser Reference
 ========================
 
-.. _api-main:
+.. _api-general:
+
+General
+-------
+
+.. automodule:: boolean_parser
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. _api-actions:
 
 Actions
 -------
@@ -23,6 +33,8 @@ Clause Actions
    :undoc-members:
    :show-inheritance:
 
+.. _api-mixins:
+
 Mixins
 ------
 
@@ -30,6 +42,8 @@ Mixins
    :members:
    :undoc-members:
    :show-inheritance:
+
+.. _api-parsers:
 
 Parsers
 -------

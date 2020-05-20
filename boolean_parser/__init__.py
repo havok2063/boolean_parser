@@ -21,7 +21,22 @@ __version__ = '0.1.0-alpha'
 
 
 def parse(value, base='sqla'):
-    ''' Convenience function to returned a parsed expression '''
+    ''' Convenience function to returned a parsed expression
+
+    Returns a parsed string using one of the available Parsers
+    in `boolean_parser`.  The ``base`` keyword argument can be used
+    to select which ``Parser`` to use.  The availble bases are: "base",
+    "sqla".  The default base is "sqla" which uses the :py:class:`boolean_parser.parsers.sqla.SQLAParser`.
+
+    Parameters:
+        value: str
+            The string expression to evaluate and parse
+        base: str:
+            The base Parser to use.  Default is sqlalchemy parser.
+
+    Returns:
+        A parsed string using a :ref:`api-parsers` object.
+    '''
     if base == 'base':
         return Parser(value).parse()
     elif base == 'sqla':

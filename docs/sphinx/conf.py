@@ -113,7 +113,9 @@ pygments_style = 'sphinx'
 todo_include_todos = False
 
 # Intersphinx mappings
-intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None),
+                       'pyparsing': ('https://pyparsing-docs.readthedocs.io/en/latest/', None),
+                       'sqlalchemy': ('https://docs.sqlalchemy.org/en/latest/', None)}
 
 autodoc_mock_imports = ['_tkinter']
 autodoc_member_order = 'groupwise'

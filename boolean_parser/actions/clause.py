@@ -23,10 +23,10 @@ class BaseAction(object):
 
     An action to perform after parsing a string clause.  If set, actions run
     Actions are attached to clauses with the ``setParseAction`` on a given ``pyparsing``
-    element.  ``setParseAction`` accepts a function or class to be applied
-    to the ``pyparsing`` element during the parsing process.  Multiple actions can be attached
-    by passing a list of functions or classes.  This class extracts the parsed data from the
-    ``pyparsing`` element and makes it accessible as a variety of named attributes.
+    element.  :py:meth:`pyparsing.ParserElement.setParseAction` accepts a function or class to
+    be applied to the ``pyparsing`` element during the parsing process.  Multiple actions can
+    be attached by passing a list of functions or classes.  This class extracts the parsed data
+    from the ``pyparsing`` element and makes it accessible as a variety of named attributes.
 
     Attributes:
         name: str
@@ -37,7 +37,7 @@ class BaseAction(object):
             The full name of the extracted parameter as base + name
         data: dict
             The extracted parsed parameters from the pyparse clause
-        original_parse: pyparsing.ParseResults
+        original_parse: :py:class:`pyparsing.ParseResults`
             The original pyparsed results object
 
     '''

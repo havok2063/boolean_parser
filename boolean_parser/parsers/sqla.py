@@ -30,11 +30,11 @@ class SQLACondition(SQLAMixin, Condition):
     action that parses a string that represents a SQLAlchemy filter condition
     and allows for conversion from the parsed string result to a SQLAlchemy
     filter object.  For SQLAlchemy conditions, the syntax for a conditon expression
-    is "model_name.parameter operand value" where "model_name.parameter" is a dotted
-    syntax for `ModelClass.parameter` which maps to `dbtable_name.column_name`. For example,
-    given a base ModelClass "ModelA" with parameter "x", the conditional
-    expression "modela.x < 4" parses into
-    "{name: 'x', fullname: 'modela.x', base: 'modela', operator: '<', value: '4'}"
+    is "database_table_name.parameter operand value" where "database_table_name.parameter"
+    is a dotted syntax for `ModelClass.parameter` which maps to `dbtable_name.column_name`.
+    For example, given a base ModelClass "TableModel" with parameter "x", that maps to a database
+    table called "table" with column "x", the conditional expression "table.x < 4" parses into
+    "{name: 'x', fullname: 'table.x', base: 'table', operator: '<', value: '4'}"
 
     '''
     pass
@@ -48,7 +48,7 @@ class SQLBoolBase(BaseBool):
 
         Parameters:
             models: list
-                A list of SQLAlchemy model bases
+                A list of SQLAlchemy ORM models
         '''
         conditions = [condition.filter(models)
                       for condition in self.conditions]
@@ -78,21 +78,21 @@ class SQLAParser(Parser):
 
     Example:
         >>> from boolean_parser.parsers import SQLAParser
-        >>> from database.models import ModelA
+        >>> from database.models import TableModel
         >>> from database import session
         >>>
         >>> # create the parser and parse a sql condition
-        >>> res = SQLParser('modela.x > 5 and modela.y < 2').parse()
+        >>> res = SQLParser('table.x > 5 and table.y < 2').parse()
         >>> res
         >>> and_(x>5, y<2)
         >>>
         >>> # generate the sqlalchemy filter
-        >>> ff = res.filter(ModelA)
+        >>> ff = res.filter(TableModel)
         >>> print(ff.compile(compile_kwargs={'literal_binds': True}))
-        >>> modela.x > 5 AND modela.y < 2
+        >>> table.x > 5 AND table.y < 2
         >>>
         >>> # perform the sqlalchemy query
-        >>> session.query(ModelA).filter(ff).all()
+        >>> session.query(TableModel).filter(ff).all()
     '''
     _bools = [SQLANot, SQLAAnd, SQLAOr]
 

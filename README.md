@@ -1,2 +1,2 @@
 # boolean_parser
-python package for parsing a string with boolean logic
+Python package for parsing a string with conditional expressions joind with boolean logic
