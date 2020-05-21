@@ -199,10 +199,13 @@ class Parser(object):
         # requires clauses (a list)
         assert cls._clauses, 'class clauses must be set.  Call cls.set_clauses.'
         assert mapping is not None, 'a mapping between clauses and actions must be provided'
+
+        # use reprs for list index check to bypass wonky list/equality clause comparisons
+        clause_reprs = [repr(c) for c in cls._clauses]
         for item in mapping:
             clause, action = item
-            assert clause in cls._clauses, 'clause must be included in list of class clauses'
-            idx = cls._clauses.index(clause)
+            assert repr(clause) in clause_reprs, 'clause must be included in list of class clauses'
+            idx = clause_reprs.index(repr(clause))
             action = action if isinstance(action, (list, tuple)) else [action]
             cls._clauses[idx].setParseAction(*action)
 
@@ -234,7 +237,7 @@ class Parser(object):
 
         '''
         assert isinstance(clauses, list), 'clauses must be a list'
-        cls._clauses = [copy.deepcopy(c) for c in clauses]
+        cls._clauses = [copy.copy(c) for c in clauses]
 
 
 # Set parse actions on conditions and build the Parser
