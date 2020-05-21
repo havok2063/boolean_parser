@@ -1,0 +1,42 @@
+
+language: python
+
+cache:
+  pip: true
+  timeout: 1000
+
+sudo: false
+
+python:
+- '3.6'
+- '3.7'
+- '3.8'
+
+os:
+- linux
+
+matrix:
+  fast_finish: true
+
+notifications:
+  email: false
+
+# repo branches to test
+branches:
+- master
+
+install:
+- pip install -U pip wheel --quiet
+- pip install --upgrade setuptools --quiet
+- pip install pytest
+- pip install pytest-coverage
+- pip install coveralls
+- pip install codecov
+- pip install .[dev]
+
+script:
+- pytest tests -p no:sugar --cov boolean_parser --cov-report html
+
+after_success:
+- codecov
+- coveralls
