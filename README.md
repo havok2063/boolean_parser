@@ -1,13 +1,9 @@
 # boolean_parser
 
 [![Build Status](https://travis-ci.com/havok2063/boolean_parser.svg?branch=master)](https://travis-ci.com/havok2063/boolean_parser)
-
 [![Documentation Status](https://readthedocs.org/projects/boolean-parser/badge/?version=latest)](https://boolean-parser.readthedocs.io/en/latest/?badge=latest)
-
 ![Python application](https://github.com/havok2063/boolean_parser/workflows/Python%20application/badge.svg)
-
 [![Coverage Status](https://coveralls.io/repos/github/havok2063/boolean_parser/badge.svg?branch=master)](https://coveralls.io/github/havok2063/boolean_parser?branch=master)
-
 [![codecov](https://codecov.io/gh/havok2063/boolean_parser/branch/master/graph/badge.svg)](https://codecov.io/gh/havok2063/boolean_parser)
 
 
