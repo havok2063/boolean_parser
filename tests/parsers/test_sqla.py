@@ -38,6 +38,15 @@ def test_parse_filter():
 
 def test_parse_filter_with_alias():
     ''' test a sqlalchemy filter parse with an aliased class '''
+    d = 'modela2.x < 3'
+    f = _make_filter(d)
+    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
+    assert f is not None
+    assert isinstance(f, BinaryExpression)
+    assert d == ww
+
+def test_parse_filter_with_model_and_alias():
+    ''' test a sqlalchemy filter parse with model and aliased classes '''
     d = 'modela.x > 5 AND modela2.x < 3'
     f = _make_filter(d)
     ww = str(f.compile(compile_kwargs={'literal_binds': True}))
