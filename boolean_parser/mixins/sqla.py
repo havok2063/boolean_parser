@@ -16,6 +16,7 @@ import inspect
 import decimal
 from sqlalchemy import func, bindparam
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
+from sqlalchemy.orm.util import AliasedClass
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import sqltypes, between
 from operator import le, ge, gt, lt, eq, ne
@@ -61,7 +62,7 @@ class SQLAMixin(object):
             models = [classes]
 
         # check for proper modelclasses
-        allmeta = all([isinstance(m, DeclarativeMeta) for m in models])
+        allmeta = all([isinstance(m, DeclarativeMeta) or isinstance(m, AliasedClass) for m in models])
         assert allmeta is True, 'All input classes must be of type SQLAlchemy ModelClasses'
 
         return models
@@ -86,7 +87,12 @@ class SQLAMixin(object):
         field = None
         # Handle hierarchical field names such as 'parent.name'
         if base_name:
-            if base_name in modelclass.__tablename__:
+            # Match alias name
+            if isinstance(modelclass, AliasedClass) and base_name==modelclass._aliased_insp.name:
+                field = getattr(modelclass, field_name, None)
+
+            # Match table name
+            if not field and base_name in modelclass.__tablename__:
                 field = getattr(modelclass, field_name, None)
         else:
             # Handle flat field names such as 'name'
