@@ -15,12 +15,14 @@ from __future__ import print_function, division, absolute_import
 import pytest
 from boolean_parser.parsers import SQLAParser
 from tests.models import ModelA, ModelB
-from sqlalchemy.sql.expression import BinaryExpression
+from sqlalchemy.sql.expression import BinaryExpression, BooleanClauseList
+from sqlalchemy.orm import aliased
 
 
 def _make_filter(value):
+    ModelA2 = aliased(ModelA, name="modela2")
     e = SQLAParser(value).parse()
-    f = e.filter([ModelA, ModelB])
+    f = e.filter([ModelA, ModelB, ModelA2])
     return f
 
 
@@ -31,6 +33,25 @@ def test_parse_filter():
     ww = str(f.compile(compile_kwargs={'literal_binds': True}))
     assert f is not None
     assert isinstance(f, BinaryExpression)
+    assert d == ww
+
+
+def test_parse_filter_with_alias():
+    ''' test a sqlalchemy filter parse with an aliased class '''
+    d = 'modela2.x < 3'
+    f = _make_filter(d)
+    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
+    assert f is not None
+    assert isinstance(f, BinaryExpression)
+    assert d == ww
+
+def test_parse_filter_with_model_and_alias():
+    ''' test a sqlalchemy filter parse with model and aliased classes '''
+    d = 'modela.x > 5 AND modela2.x < 3'
+    f = _make_filter(d)
+    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
+    assert f is not None
+    assert isinstance(f, BooleanClauseList)
     assert d == ww
 
 
