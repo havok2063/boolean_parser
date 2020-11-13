@@ -41,7 +41,8 @@ if sphinx_template == 'sphinx-bootstrap':
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.autosummary',
               'sphinx.ext.todo', 'sphinx.ext.viewcode', 'sphinx.ext.mathjax',
-              'sphinx.ext.intersphinx', 'sphinx.ext.inheritance_diagram']
+              'sphinx.ext.intersphinx', 'sphinx.ext.inheritance_diagram',
+              'sphinx_issues']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -88,6 +89,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
 default_role = 'py:obj'
+
+issues_github_path = 'havok2063/boolean_parser'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 # add_function_parentheses = True

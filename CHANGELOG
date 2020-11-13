@@ -2,8 +2,13 @@
 Change Log
 ==========
 
-[0.1.0]- (2020-05-21)
----------------------
+[0.1.1] - 2020-11-13
+--------------------
+- Adds support (:pr:`1`) for aliased SQLAlchemy models
+
+
+[0.1.0] - 2020-05-21
+--------------------
 
 - Initial commit of repo
 - Created basic boolean syntax parser, ``Parser``, using pyparsing for words and logic expressions
