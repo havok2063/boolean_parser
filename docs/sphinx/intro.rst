@@ -152,10 +152,9 @@ The original input string expression, as well as the extracted parameters and co
 Parsing SQLAlchemy Filters
 --------------------------
 
-The :py:class:`boolean_parser.parsers.sqla.SQLAParser` class for SQLAlchemy provides an
-additional ``filter`` function that converts a parsed boolean string into a SQLAlchemy filter condition
-useable in SQLAlchemy queries.  Otherwise it behaves exactly the same as the core
-:py:class:`boolean_parser.parsers.base.Parser`.
+The `.SQLAParser` class for SQLAlchemy provides an additional ``filter`` function that converts a parsed boolean
+string into a SQLAlchemy filter condition useable in SQLAlchemy queries.  Otherwise it behaves exactly the same as the core
+`.Parser`.
 
 Suppose we have a database with a table "table" and columns "x", and "y".  The SQLAlchemy database session is
 defined in a `database` module, along with our SQLAlchemy ORM models, including a "TableModel", defined in a
@@ -176,11 +175,11 @@ and parse the string expression using the `boolean_parser`.
     >>> res
     >>> and_(x>5, y<2)
 
-Attached to our parsed results is a :py:meth:`boolean_parser.mixins.sqla.SQLAMixin.filter` method which accepts a list
+Attached to our parsed results is a `.SQLAMixin.filter` method which accepts a list
 of SQLAlchemy ORM Models as input.  It then traverses the parsed result, converting boolean operations, parameters names,
 and conditional expressions into the appropriate relevant SQLAlchemy syntax.  The returned object is now a SQLAlchemy
-object, usually a Boolean :py:class:`sqlalchemy.sql.expression.ClauseList`,
-or a :py:class:`sqlalchemy.sql.expression.BinaryExpression`, objects that represent SQLalchemy filter clause elements.
+object, usually a Boolean `~sqlalchemy.sql.expression.ClauseList`,
+or a `~sqlalchemy.sql.expression.BinaryExpression`, objects that represent SQLalchemy filter clause elements.
 ::
 
     >>> # generate the sqlalchemy filter
@@ -192,11 +191,25 @@ or a :py:class:`sqlalchemy.sql.expression.BinaryExpression`, objects that repres
     >>> print(ff.compile(compile_kwargs={'literal_binds': True}))
     >>> table.x > 5 AND table.y < 2
 
-You can pass the filter expression directly into the SQLAlchemy `filter` method during a query.
+You can pass the filter expression directly into the SQLAlchemy ``filter`` method during a query.
 ::
 
     >>> # perform the sqlalchemy query
     >>> session.query(TableModel).filter(ff).all()
+
+`.SQLAParser` supports `~sqlalchemy.orm.aliased` SQLAlchemy models as well.
+::
+
+    >>> from sqlalchemy.orm import aliased
+    >>> from database.models import TableModel
+
+    >>> # create a new model aliased from TableModel
+    >>> new_table = aliased(TableModel, name='newtable')
+
+    >>> res = parse('table.x > 5 and newtable.y < 2')
+    >>> ff = res.filter([TableModel, new_table])
+    >>> print(ff.compile(compile_kwargs={'literal_binds': True}))
+    >>> table.x > 5 AND newtable.y < 2
 
 
 Building a Custom Parser
