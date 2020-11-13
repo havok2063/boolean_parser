@@ -36,23 +36,17 @@ def test_parse_filter():
     assert d == ww
 
 
-def test_parse_filter_with_alias():
+@pytest.mark.parametrize('query, kls',
+                         [('modela2.x < 3', BinaryExpression),
+                          ('modela.x > 5 AND modela2.x < 3', BooleanClauseList)],
+                         ids=['single', 'multi'])
+def test_parse_filter_with_alias(query, kls):
     ''' test a sqlalchemy filter parse with an aliased class '''
-    d = 'modela2.x < 3'
-    f = _make_filter(d)
+    f = _make_filter(query)
     ww = str(f.compile(compile_kwargs={'literal_binds': True}))
     assert f is not None
-    assert isinstance(f, BinaryExpression)
-    assert d == ww
-
-def test_parse_filter_with_model_and_alias():
-    ''' test a sqlalchemy filter parse with model and aliased classes '''
-    d = 'modela.x > 5 AND modela2.x < 3'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    assert f is not None
-    assert isinstance(f, BooleanClauseList)
-    assert d == ww
+    assert isinstance(f, kls)
+    assert query == ww
 
 
 @pytest.fixture(autouse=True)
