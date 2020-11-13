@@ -88,7 +88,8 @@ class SQLAMixin(object):
         # Handle hierarchical field names such as 'parent.name'
         if base_name:
             # Match alias name
-            if isinstance(modelclass, AliasedClass) and base_name==modelclass._aliased_insp.name:
+            if isinstance(modelclass, AliasedClass) and \
+                    base_name == modelclass._aliased_insp.name.lower():
                 field = getattr(modelclass, field_name, None)
 
             # Match table name
