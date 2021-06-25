@@ -17,7 +17,7 @@ from boolean_parser.parsers import Parser
 from boolean_parser.parsers import SQLAParser
 
 
-__version__ = '0.1.2'
+__version__ = '0.1.3-alpha'
 
 
 def parse(value, base='sqla'):
