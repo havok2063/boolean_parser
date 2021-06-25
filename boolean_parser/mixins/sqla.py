@@ -15,7 +15,7 @@ from __future__ import print_function, division, absolute_import
 import inspect
 import decimal
 from sqlalchemy import func, bindparam
-from sqlalchemy.ext.declarative.api import DeclarativeMeta
+from sqlalchemy.orm import DeclarativeMeta
 from sqlalchemy.orm.util import AliasedClass
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import sqltypes, between
@@ -24,7 +24,6 @@ from boolean_parser.parsers.base import BooleanParserException
 
 
 opdict = {'<=': le, '>=': ge, '>': gt, '<': lt, '!=': ne, '==': eq, '=': eq}
-
 
 class SQLAMixin(object):
     ''' A Mixin class to apply SQLAlchemy filter parsing

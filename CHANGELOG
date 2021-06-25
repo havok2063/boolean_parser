@@ -2,6 +2,10 @@
 Change Log
 ==========
 
+[0.1.2] - 2021-06-25
+--------------------
+- Fixes :issue:`3` - bumps ``sqlalchemy`` version to >1.4
+
 [0.1.1] - 2020-11-13
 --------------------
 - Adds support (:pr:`1`) for aliased SQLAlchemy models
