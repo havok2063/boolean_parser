@@ -156,6 +156,12 @@ The `.SQLAParser` class for SQLAlchemy provides an additional ``filter`` functio
 string into a SQLAlchemy filter condition useable in SQLAlchemy queries.  Otherwise it behaves exactly the same as the core
 `.Parser`.
 
+..  note::
+
+    The following is a toy example.  All references to module "database.models", "datamodel.session", and 
+    class "TableModel", etc are to be replaced by your own code containing your database code and 
+    SQLAlchemy models and connections.  These are not importable in the ``boolean_parser`` package.  
+
 Suppose we have a database with a table "table" and columns "x", and "y".  The SQLAlchemy database session is
 defined in a `database` module, along with our SQLAlchemy ORM models, including a "TableModel", defined in a
 `database.models` module.  We want to parse the string expression "table.x > 5 and table.y < 2" and use it as
