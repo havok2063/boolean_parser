@@ -179,11 +179,9 @@ class SQLAMixin(object):
                 value = self.value
                 if value.find('*') >= 0:
                     value = value.replace('*', '%')
-                    condition = field.ilike(
-                        bindparam(self.bindname, value))
+                    condition = field.ilike(value)
                 else:
-                    condition = field.ilike(
-                        '%' + bindparam(self.bindname, value) + '%')
+                    condition = field.ilike('%' + value + '%')
             else:
                 # if not a text column, then use "=" as a straight equals
                 condition = lower_field.__eq__(lower_value)
