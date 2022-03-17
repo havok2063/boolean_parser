@@ -173,6 +173,12 @@ class SQLAMixin(object):
                 value = self.value
                 if value.lower() == 'null':
                     condition = field.isnot(None)
+            elif isinstance(field.type, sqltypes.BOOLEAN) or \
+                isinstance(field.type, sqltypes.Boolean):
+                field = getattr(model, self.name)
+                value = self.value
+                if value.lower() == 'null':
+                    condition = field.isnot(None)
             elif isinstance(field.type, sqltypes.DATE) or \
                 isinstance(field.type, sqltypes.DATETIME) or \
                 isinstance(field.type, sqltypes.Date) or \
@@ -200,6 +206,12 @@ class SQLAMixin(object):
                     condition = field.ilike(value)
                 else:
                     condition = field.ilike('%' + value + '%')
+            elif isinstance(field.type, sqltypes.BOOLEAN) or \
+                isinstance(field.type, sqltypes.Boolean):
+                field = getattr(model, self.name)
+                value = self.value
+                if value.lower() == 'null':
+                    condition = field.isnot(None)
             elif isinstance(field.type, sqltypes.DATE) or \
                 isinstance(field.type, sqltypes.DATETIME) or \
                 isinstance(field.type, sqltypes.Date) or \
