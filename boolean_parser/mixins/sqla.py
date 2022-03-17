@@ -172,7 +172,15 @@ class SQLAMixin(object):
                 field = getattr(model, self.name)
                 value = self.value
                 if value.lower() == 'null':
-                    condition = field.is_(None)
+                    condition = field.isnot(None)
+            elif isinstance(field.type, sqltypes.DATE) or \
+                isinstance(field.type, sqltypes.DATETIME) or \
+                isinstance(field.type, sqltypes.Date) or \
+                isinstance(field.type, sqltypes.DateTime):
+                field = getattr(model, self.name)
+                value = self.value
+                if value.lower() == 'null':
+                    condition = field.isnot(None)
             else:
                 condition = lower_field.__ne__(lower_value)
         elif self.operator == '=':
@@ -192,6 +200,14 @@ class SQLAMixin(object):
                     condition = field.ilike(value)
                 else:
                     condition = field.ilike('%' + value + '%')
+            elif isinstance(field.type, sqltypes.DATE) or \
+                isinstance(field.type, sqltypes.DATETIME) or \
+                isinstance(field.type, sqltypes.Date) or \
+                isinstance(field.type, sqltypes.DateTime):
+                field = getattr(model, self.name)
+                value = self.value
+                if value.lower() == 'null':
+                    condition = field.is_(None)
             else:
                 # if not a text column, then use "=" as a straight equals
                 condition = lower_field.__eq__(lower_value)
