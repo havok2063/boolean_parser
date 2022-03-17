@@ -156,7 +156,29 @@ class SQLAMixin(object):
         # Return SQLAlchemy condition based on operator value
         # self.name is parameter name, lower_field is Table.parameterName
         if self.operator == '==':
-            condition = lower_field.__eq__(lower_value)
+            if isinstance(field.type, sqltypes.TEXT) or \
+                isinstance(field.type, sqltypes.VARCHAR) or \
+                isinstance(field.type, sqltypes.String):
+                field = getattr(model, self.name)
+                value = self.value
+                if value.lower() == 'null':
+                    condition = field.is_(None)
+            elif isinstance(field.type, sqltypes.BOOLEAN) or \
+                isinstance(field.type, sqltypes.Boolean):
+                field = getattr(model, self.name)
+                value = self.value
+                if value.lower() == 'null':
+                    condition = field.is_(None)
+            elif isinstance(field.type, sqltypes.DATE) or \
+                isinstance(field.type, sqltypes.DATETIME) or \
+                isinstance(field.type, sqltypes.Date) or \
+                isinstance(field.type, sqltypes.DateTime):
+                field = getattr(model, self.name)
+                value = self.value
+                if value.lower() == 'null':
+                    condition = field.is_(None)
+            else:
+                condition = lower_field.__eq__(lower_value)
         elif self.operator == '<':
             condition = lower_field.__lt__(lower_value)
         elif self.operator == '<=':
