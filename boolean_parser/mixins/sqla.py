@@ -211,7 +211,7 @@ class SQLAMixin(object):
                 field = getattr(model, self.name)
                 value = self.value
                 if value.lower() == 'null':
-                    condition = field.isnot(None)
+                    condition = field.is_(None)
             elif isinstance(field.type, sqltypes.DATE) or \
                 isinstance(field.type, sqltypes.DATETIME) or \
                 isinstance(field.type, sqltypes.Date) or \
