@@ -166,7 +166,15 @@ class SQLAMixin(object):
         elif self.operator == '>=':
             condition = lower_field.__ge__(lower_value)
         elif self.operator == '!=':
-            condition = lower_field.__ne__(lower_value)
+            if isinstance(field.type, sqltypes.TEXT) or \
+                isinstance(field.type, sqltypes.VARCHAR) or \
+                isinstance(field.type, sqltypes.String):
+                field = getattr(model, self.name)
+                value = self.value
+                if value.lower() == 'null':
+                    condition = field.is_(None)
+            else:
+                condition = lower_field.__ne__(lower_value)
         elif self.operator == '=':
             if isinstance(field.type, sqltypes.TEXT) or \
                 isinstance(field.type, sqltypes.VARCHAR) or \
@@ -177,7 +185,9 @@ class SQLAMixin(object):
                 # x=*5 -> x LIKE '%5' (x ends with 5)
                 field = getattr(model, self.name)
                 value = self.value
-                if value.find('*') >= 0:
+                if value.lower() == 'null':
+                    condition = field.is_(None)
+                elif value.find('*') >= 0:
                     value = value.replace('*', '%')
                     condition = field.ilike(value)
                 else:
