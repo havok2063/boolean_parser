@@ -285,9 +285,11 @@ class SQLAMixin(object):
         '''
 
         assert datatype in [float, int], 'datatype must be either float or int'
-
         try:
-            out = datatype(value)
+            if value.lower() == 'null':
+                out = 'null'
+            else:
+                out = datatype(value)
         except (ValueError, SyntaxError):
             raise BooleanParserException(f'Field {self.name} expects a {datatype.__name__} value.  Received {value} instead.')
         else:
