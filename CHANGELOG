@@ -6,6 +6,8 @@ Change Log
 --------------------
 - :pr:`6` - Adds null and date options, fixes ilike, like operators
 - Fixes :issue:`5` - no value bindname
+- Fix some dependencies.
+- Add operand syntax table to documentation
 
 [0.1.2] - 2021-06-25
 --------------------
