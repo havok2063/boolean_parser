@@ -25,150 +25,26 @@ def _make_filter(value):
     f = e.filter([ModelA, ModelB, ModelA2])
     return f
 
-
-def test_parse_filter_gt_int():
+@pytest.mark.parametrize('val, exp',
+                         [('modela.x > 5', 'modela.x > 5'),
+                          ('modela.x < 5', 'modela.x < 5'),
+                          ('modela.x = 5', 'modela.x = 5'),
+                          ('modela.x == 5', 'modela.x = 5'),
+                          ('modela.name = Some_string', "lower(lower(modela.name)) LIKE lower('%' || 'Some_string' || '%')"),
+                          ('modela.name == "Some_string"', "lower(modela.name) = lower('Some_string')"),
+                          ('modela.name = null', "modela.name IS NULL"),
+                          ('modela.name == null', "modela.name IS NULL"),
+                          ('modela.dates = 2020-01-01', "lower(modela.dates) = lower('2020-01-01')"),
+                          ('modela.dates == 2020-01-01', "lower(modela.dates) = lower('2020-01-01')")],
+                         ids=['gt', 'lt', 'eq', 'eqeq', 'eqstr', 'eqeqstr',
+                              'null', 'eqnull', 'date', 'eqdate'])
+def test_parse_filter(val, exp):
     ''' test a sqlalchemy filter parse '''
-    d = 'modela.x > 5'
-    f = _make_filter(d)
+    f = _make_filter(val)
     ww = str(f.compile(compile_kwargs={'literal_binds': True}))
     assert f is not None
     assert isinstance(f, BinaryExpression)
-    assert d == ww
-
-
-def test_parse_filter_lt_int():
-    ''' test a sqlalchemy filter parse '''
-    d = 'modela.x < 5'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    assert f is not None
-    assert isinstance(f, BinaryExpression)
-    assert d == ww
-
-
-def test_parse_filter_eq_int():
-    ''' test a sqlalchemy filter parse '''
-    d = 'modela.x = 5'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    assert f is not None
-    assert isinstance(f, BinaryExpression)
-    assert d == ww
-
-
-def test_parse_filter_straight_eq_int():
-    ''' test a sqlalchemy filter parse '''
-    d_straight_eq = 'modela.x == 5'
-    f_straight_eq = _make_filter(d_straight_eq)
-    ww_straight_equals = str(f_straight_eq.compile(compile_kwargs={'literal_binds': True}))
-
-    d_eq = 'modela.x = 5'
-    f_eq = _make_filter(d_eq)
-    ww_equals = str(f_eq.compile(compile_kwargs={'literal_binds': True}))
-
-    assert f_eq is not None
-    assert f_straight_eq is not None
-    assert isinstance(f_eq, BinaryExpression)
-    assert isinstance(f_straight_eq, BinaryExpression)
-
-    # in the case of int, they should evaluate to the same expression
-    assert ww_equals == ww_straight_equals
-
-
-def test_parse_filter_eq_str():
-    ''' test a sqlalchemy filter parse '''
-    d = 'modela.name = Some_string'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    assert f is not None
-    assert isinstance(f, BinaryExpression)
-    assert ww == "lower(lower(modela.name)) LIKE lower('%' || 'Some_string' || '%')"
-
-
-def test_parse_filter_straight_eq_str():
-    ''' test a sqlalchemy filter parse '''
-    d_straight_eq = 'modela.name == "Some_string"'
-    f_straight_eq = _make_filter(d_straight_eq)
-    ww_straight_equals = str(f_straight_eq.compile(
-        compile_kwargs={'literal_binds': True}))
-
-    d_eq = 'modela.name = "Some_string"'
-    f_eq = _make_filter(d_eq)
-    ww_equals = str(f_eq.compile(
-        compile_kwargs={'literal_binds': True}))
-
-    assert f_eq is not None
-    assert f_straight_eq is not None
-    assert isinstance(f_eq, BinaryExpression)
-    assert isinstance(f_straight_eq, BinaryExpression)
-
-    # in the case of str, they should evaluate to something different
-    assert ww_equals == "lower(lower(modela.name)) LIKE lower('%' || 'Some_string' || '%')"
-    assert ww_straight_equals == "lower(modela.name) = lower('Some_string')"
-
-
-def test_parse_filter_eq_null():
-    ''' test a sqlalchemy filter parse '''
-    d = 'modela.name = null'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    assert f is not None
-    assert isinstance(f, BinaryExpression)
-    assert ww == "modela.name IS NULL"
-
-
-def test_parse_filter_straight_eq_null():
-    ''' test a sqlalchemy filter parse '''
-    d_straight_eq = 'modela.name == null'
-    f_straight_eq = _make_filter(d_straight_eq)
-    ww_straight_equals = str(f_straight_eq.compile(
-        compile_kwargs={'literal_binds': True}))
-
-    d_eq = 'modela.name = null'
-    f_eq = _make_filter(d_eq)
-    ww_equals = str(f_eq.compile(
-        compile_kwargs={'literal_binds': True}))
-
-    assert f_eq is not None
-    assert f_straight_eq is not None
-    assert isinstance(f_eq, BinaryExpression)
-    assert isinstance(f_straight_eq, BinaryExpression)
-
-    # in the case of str, they should evaluate to something different
-    assert ww_equals == "modela.name IS NULL"
-    assert ww_equals == ww_straight_equals
-
-
-def test_parse_filter_eq_date():
-    ''' test a sqlalchemy filter parse '''
-    d = 'modela.dates = 2020-01-01'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    assert f is not None
-    assert isinstance(f, BinaryExpression)
-    assert ww == "lower(modela.dates) = lower('2020-01-01')"
-
-
-def test_parse_filter_straight_eq_date():
-    ''' test a sqlalchemy filter parse '''
-    d_straight_eq = 'modela.dates == 2020-01-01'
-    f_straight_eq = _make_filter(d_straight_eq)
-    ww_straight_equals = str(f_straight_eq.compile(
-        compile_kwargs={'literal_binds': True}))
-
-    d_eq = 'modela.dates = 2020-01-01'
-    f_eq = _make_filter(d_eq)
-    ww_equals = str(f_eq.compile(
-        compile_kwargs={'literal_binds': True}))
-
-    assert f_eq is not None
-    assert f_straight_eq is not None
-    assert isinstance(f_eq, BinaryExpression)
-    assert isinstance(f_straight_eq, BinaryExpression)
-
-    # in the case of str, they should evaluate to something different
-    assert ww_equals == "lower(modela.dates) = lower('2020-01-01')"
-    assert ww_equals == ww_straight_equals
+    assert exp == ww
 
 
 @pytest.mark.parametrize('query, kls',
@@ -196,37 +72,14 @@ def test_query(session):
     assert len(res) > 0 and len(res) < 20
 
 
-def test_query_with_filter_gt_date(session):
+@pytest.mark.parametrize('val, exp',
+                         [('modela.dates > 2020-01-01', 0),
+                          ('modela.dates < 2020-01-01', 20),
+                          ('modela.nulls == NULL', 20),
+                          ('modela.nulls != Null', 0)],
+                         ids=['gtdate', 'ltdate', 'eqnull', 'neqnull'])
+def test_query_with_filter(session, val, exp):
     ''' test a query with a parsed filter '''
-    d = 'modela.dates > 2020-01-01'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
+    f = _make_filter(val)
     res = session.query(ModelA).filter(f).all()
-    assert len(res) == 0
-
-
-def test_query_with_filter_lt_date(session):
-    ''' test a query with a parsed filter '''
-    d = 'modela.dates < 2020-01-01'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    res = session.query(ModelA).filter(f).all()
-    assert len(res) == 20
-
-
-def test_query_with_filter_eq_null(session):
-    ''' test a query with a parsed filter '''
-    d = 'modela.nulls == NULL'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    res = session.query(ModelA).filter(f).all()
-    assert len(res) == 20
-
-
-def test_query_with_filter_nq_null(session):
-    ''' test a query with a parsed filter '''
-    d = 'modela.nulls != Null'
-    f = _make_filter(d)
-    ww = str(f.compile(compile_kwargs={'literal_binds': True}))
-    res = session.query(ModelA).filter(f).all()
-    assert len(res) == 0
+    assert len(res) == exp
