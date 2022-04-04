@@ -155,46 +155,69 @@ class SQLAMixin(object):
 
         # Return SQLAlchemy condition based on operator value
         # self.name is parameter name, lower_field is Table.parameterName
-        if self.operator == '==':
-            condition = lower_field.__eq__(lower_value)
         elif self.operator == '<':
             condition = lower_field.__lt__(lower_value)
+
         elif self.operator == '<=':
             condition = lower_field.__le__(lower_value)
+
         elif self.operator == '>':
             condition = lower_field.__gt__(lower_value)
+
         elif self.operator == '>=':
             condition = lower_field.__ge__(lower_value)
+
         elif self.operator == '!=':
-            condition = lower_field.__ne__(lower_value)
-        elif self.operator == '=':
+            field = getattr(model, self.name)
+            value = self.value
+            # Handle NULL values
+            if value.lower() == 'null':
+                condition = field.isnot(None)
+            else:
+                condition = lower_field.__ne__(lower_value)
+
+        elif self.operator == '=' or self.operator == '==':
+            # Handle string type
             if isinstance(field.type, sqltypes.TEXT) or \
                 isinstance(field.type, sqltypes.VARCHAR) or \
                 isinstance(field.type, sqltypes.String):
-                # this operator maps to LIKE
-                # x=5 -> x LIKE '%5%' (x contains 5)
-                # x=5* -> x LIKE '5%' (x starts with 5)
-                # x=*5 -> x LIKE '%5' (x ends with 5)
                 field = getattr(model, self.name)
                 value = self.value
-                if value.find('*') >= 0:
+                # Handle NULL values
+                if value.lower() == 'null':
+                    condition = field.is_(None)
+                # if operator is straing equals, check accordingly
+                elif self.operator == '==':
+                    condition = lower_field.__eq__(lower_value)
+                # otherwise, this operator maps to LIKE
+                # x=5   ->  x LIKE '%5%' (x contains 5)
+                # x=5*  ->  x LIKE '5%'  (x starts with 5)
+                # x=*5  ->  x LIKE '%5'  (x ends with 5)
+                elif value.find('*') >= 0:
                     value = value.replace('*', '%')
-                    condition = field.ilike(
-                        bindparam(self.bindname, value))
+                    condition = lower_field.ilike(bindparam(self.fullname, value))
                 else:
-                    condition = field.ilike(
-                        '%' + bindparam(self.bindname, value) + '%')
+                    condition = lower_field.ilike('%' + bindparam(self.fullname, value) + '%')
+            # For all other types, assume straight equality
             else:
-                # if not a text column, then use "=" as a straight equals
-                condition = lower_field.__eq__(lower_value)
+                field = getattr(model, self.name)
+                value = self.value
+                # Handle NULL values
+                if value.lower() == 'null':
+                    condition = field.is_(None)
+                else:
+                    condition = lower_field.__eq__(lower_value)
+
         elif self.operator == 'between':
             # between condition
             condition = between(lower_field, lower_value, lower_value_2)
+
         elif self.operator in ['&', '|']:
             # bitwise operations
             condition = lower_field.op(self.operator)(lower_value) > 0
 
         return condition
+
 
     def _bind_and_lower_value(self, field):
         ''' Bind and lower the value based on field type'''
@@ -262,9 +285,11 @@ class SQLAMixin(object):
         '''
 
         assert datatype in [float, int], 'datatype must be either float or int'
-
         try:
-            out = datatype(value)
+            if value.lower() == 'null':
+                out = 'null'
+            else:
+                out = datatype(value)
         except (ValueError, SyntaxError):
             raise BooleanParserException(f'Field {self.name} expects a {datatype.__name__} value.  Received {value} instead.')
         else:

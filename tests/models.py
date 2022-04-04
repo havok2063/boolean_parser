@@ -13,17 +13,20 @@
 
 from __future__ import print_function, division, absolute_import
 
-from sqlalchemy import Column, String, BigInteger, Integer, Float
+from sqlalchemy import Column, Date, String, BigInteger, Integer, Float
 from .database import Base, engine, Session
 import factory
 import factory.fuzzy
 from pytest_factoryboy import register
 
+import datetime
 
 class ModelA(Base):
     __tablename__ = 'modela'
     pk = Column(BigInteger, primary_key=True)
     name = Column(String, nullable=False)
+    nulls = Column(Integer, nullable=True)
+    dates = Column(Date, nullable=False)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
 
@@ -49,6 +52,12 @@ class ModelAFactory(factory.alchemy.SQLAlchemyModelFactory):
     x = factory.Faker('pyint', min_value=0, max_value=20)
     y = factory.Faker('pyint', min_value=0, max_value=20)
     name = factory.fuzzy.FuzzyText(prefix='model', length=3)
+    nulls = factory.Sequence(lambda n: None)
+    dates = factory.Faker(
+        'date_between_dates',
+        date_start=datetime.date(2000, 1, 1),
+        date_end=datetime.date(2020, 1, 1),
+    )
 
 
 @register
