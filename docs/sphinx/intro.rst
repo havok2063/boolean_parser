@@ -158,9 +158,9 @@ string into a SQLAlchemy filter condition useable in SQLAlchemy queries.  Otherw
 
 ..  note::
 
-    The following is a toy example.  All references to module "database.models", "datamodel.session", and 
-    class "TableModel", etc are to be replaced by your own code containing your database code and 
-    SQLAlchemy models and connections.  These are not importable in the ``boolean_parser`` package.  
+    The following is a toy example.  All references to module "database.models", "datamodel.session", and
+    class "TableModel", etc are to be replaced by your own code containing your database code and
+    SQLAlchemy models and connections.  These are not importable in the ``boolean_parser`` package.
 
 Suppose we have a database with a table "table" and columns "x", and "y".  The SQLAlchemy database session is
 defined in a `database` module, along with our SQLAlchemy ORM models, including a "TableModel", defined in a
@@ -216,6 +216,85 @@ You can pass the filter expression directly into the SQLAlchemy ``filter`` metho
     >>> ff = res.filter([TableModel, new_table])
     >>> print(ff.compile(compile_kwargs={'literal_binds': True}))
     >>> table.x > 5 AND newtable.y < 2
+
+Supported Operand Syntax
+------------------------
+
+The following table shows the currently supported string operand syntax and its SQLAlchemy operand
+expresssion.
+
+.. list-table:: Operand Syntax
+   :widths: 15 15 20 20
+   :header-rows: 1
+
+   * - String Syntax
+     - Descriptive
+     - Example
+     - SQLA Equivalent
+   * - <
+     - less than
+     - table.x < 5
+     - table.x < 5
+   * - <=
+     - less than or equal to
+     - table.x <= 5
+     - table.x <= 5
+   * - >
+     - greater than
+     - table.x > 5
+     - table.x > 5
+   * - >=
+     - greater than or equal to
+     - table.x >= 5
+     - table.x >= 5
+   * - =
+     - equal
+     - table.x = 5
+     - table.x = 5
+   * - ==
+     - strict equal
+     - table.x == 5
+     - table.x = 5
+   * - !=
+     - not equal to
+     - table.x != 5
+     - table.x != 5
+   * - ==
+     - strict equal
+     - table.x == Bear
+     - table.x = Bear
+   * - =
+     - ilike
+     - table.x = Bear
+     - table.x ilike '%Bear%'
+   * - =
+     - ilike
+     - table.x = '\*Bear'
+     - table.x ilike '%Bear'
+   * - =
+     - ilike
+     - table.x = 'Bear*'
+     - table.x ilike 'Bear%'
+   * - =
+     - is null
+     - table.x = Null
+     - table.x.is_(None)
+   * - !=
+     - is not null
+     - table.x != Null
+     - table.x.is_not(None)
+   * - between
+     - between A and B
+     - table.x between 1 and 10
+     - table.x between 1 and 10
+   * - &
+     - bitwise & (and)
+     - table.x & 5
+     - table.x.op(&)(5) > 0
+   * - \|
+     - bitwise | (or)
+     - table.x | 5
+     - table.x.op(|)(5) > 0
 
 
 Building a Custom Parser
