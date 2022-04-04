@@ -2,7 +2,7 @@
 Change Log
 ==========
 
-[0.1.3] - unreleased
+[0.1.3] - 2022-04-04
 --------------------
 - :pr:`6` - Adds null and date options, fixes ilike, like operators
 - Fixes :issue:`5` - no value bindname
