@@ -273,6 +273,33 @@ class SQLAMixin(object):
 
         return out_value, lower_field
 
+
+    def _to_bool(value):
+        valid = {
+            "true": True,
+            "t": True,
+            "1": True,
+            "yes": True,
+            "false": False,
+            "f": False,
+            "0": False,
+            "no": False,
+        }
+
+        if isinstance(value, bool):
+            return value
+
+        if not isinstance(value, basestring):
+            raise ValueError("invalid literal for boolean. Not a string.")
+
+        lower_value = value.lower()
+        if lower_value in valid:
+            return valid[lower_value]
+
+        else:
+            raise ValueError('invalid literal for boolean: "%s"' % value)
+
+
     def _cast_value(self, value, datatype=float):
         ''' Cast a value to a specific Python type
 
@@ -290,10 +317,13 @@ class SQLAMixin(object):
         try:
             if value.lower() == 'null':
                 out = 'null'
+            elif datatype == bool:
+                out = _to_bool(value)
             else:
                 out = datatype(value)
         except (ValueError, SyntaxError):
             raise BooleanParserException(f'Field {self.name} expects a {datatype.__name__} value. Received {value} instead.')
         else:
             return out
+
 
