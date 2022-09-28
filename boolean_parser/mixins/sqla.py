@@ -225,7 +225,7 @@ class SQLAMixin(object):
         lower_value_2 = None
 
         # get python field type
-        ftypes = [float, int, decimal.Decimal]
+        ftypes = [float, bool, int, decimal.Decimal]
         fieldtype = field.type.python_type
 
         # format the values
@@ -245,7 +245,7 @@ class SQLAMixin(object):
     def _format_value(self, value, fieldtype, field):
         ''' Formats the value based on the fieldtype
 
-        Formats the value to proper numreical type and lowercases
+        Formats the value to proper numerical type and lowercases
         the field for string fields.
 
         Parameters:
@@ -265,6 +265,8 @@ class SQLAMixin(object):
             out_value = self._cast_value(value, datatype=float)
         elif fieldtype == int:
             out_value = self._cast_value(value, datatype=int)
+        elif fieldtype == bool:
+            out_value = self._cast_value(value, datatype=bool)
         else:
             lower_field = func.lower(field)
             out_value = value
@@ -275,23 +277,23 @@ class SQLAMixin(object):
         ''' Cast a value to a specific Python type
 
         Parameters:
-            value (int|float):
+            value (int|float|bool):
                 A numeric value to cast to a float or integer
             datatype (object):
-                The numeric cast function.  Can be either float or int.
+                The cast function. Can be either float, int or bool
 
         Returns:
             The value explicitly cast to an integer or float
         '''
 
-        assert datatype in [float, int], 'datatype must be either float or int'
+        assert datatype in [float, int, bool], 'datatype must be either float, int or bool'
         try:
             if value.lower() == 'null':
                 out = 'null'
             else:
                 out = datatype(value)
         except (ValueError, SyntaxError):
-            raise BooleanParserException(f'Field {self.name} expects a {datatype.__name__} value.  Received {value} instead.')
+            raise BooleanParserException(f'Field {self.name} expects a {datatype.__name__} value. Received {value} instead.')
         else:
             return out
 
