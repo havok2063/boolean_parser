@@ -13,7 +13,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-from sqlalchemy import Column, Date, String, BigInteger, Integer, Float
+from sqlalchemy import Boolean, Column, Date, String, BigInteger, Integer, Float
 from .database import Base, engine, Session
 import factory
 import factory.fuzzy
@@ -27,6 +27,7 @@ class ModelA(Base):
     name = Column(String, nullable=False)
     nulls = Column(Integer, nullable=True)
     dates = Column(Date, nullable=False)
+    bools = Column(Boolean, nullable=False)
     x = Column(Integer, nullable=False)
     y = Column(Integer, nullable=False)
 
@@ -53,6 +54,7 @@ class ModelAFactory(factory.alchemy.SQLAlchemyModelFactory):
     y = factory.Faker('pyint', min_value=0, max_value=20)
     name = factory.fuzzy.FuzzyText(prefix='model', length=3)
     nulls = factory.Sequence(lambda n: None)
+    bools = factory.Sequence(lambda n: True)
     dates = factory.Faker(
         'date_between_dates',
         date_start=datetime.date(2000, 1, 1),
