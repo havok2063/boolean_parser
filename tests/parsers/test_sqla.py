@@ -25,19 +25,37 @@ def _make_filter(value):
     f = e.filter([ModelA, ModelB, ModelA2])
     return f
 
-@pytest.mark.parametrize('val, exp',
-                         [('modela.x > 5', 'modela.x > 5'),
-                          ('modela.x < 5', 'modela.x < 5'),
-                          ('modela.x = 5', 'modela.x = 5'),
-                          ('modela.x == 5', 'modela.x = 5'),
-                          ('modela.name = Some_string', "lower(lower(modela.name)) LIKE lower('%' || 'Some_string' || '%')"),
-                          ('modela.name == "Some_string"', "lower(modela.name) = lower('Some_string')"),
-                          ('modela.name = null', "modela.name IS NULL"),
-                          ('modela.name == null', "modela.name IS NULL"),
-                          ('modela.dates = 2020-01-01', "lower(modela.dates) = lower('2020-01-01')"),
-                          ('modela.dates == 2020-01-01', "lower(modela.dates) = lower('2020-01-01')")],
-                         ids=['gt', 'lt', 'eq', 'eqeq', 'eqstr', 'eqeqstr',
-                              'null', 'eqnull', 'date', 'eqdate'])
+@pytest.mark.parametrize(
+    "val, exp",
+    [
+        ("modela.x > 5", "modela.x > 5"),
+        ("modela.x < 5", "modela.x < 5"),
+        ("modela.x = 5", "modela.x = 5"),
+        ("modela.x == 5", "modela.x = 5"),
+        ("modela.name = Some_string", "lower(lower(modela.name)) LIKE lower('%' || 'Some_string' || '%')",),
+        ('modela.name == "Some_string"', "lower(modela.name) = lower('Some_string')"),
+        ("modela.name = null", "modela.name IS NULL"),
+        ("modela.name == null", "modela.name IS NULL"),
+        ("modela.bools = True", "modela.bools = true"),
+        ("modela.bools == False", "modela.bools = false"),
+        ("modela.dates = 2020-01-01", "modela.dates = lower('2020-01-01 00:00:00')"),
+        ("modela.dates == 2020-01-01T00:00:00", "modela.dates = lower('2020-01-01 00:00:00')",),
+    ],
+    ids=[
+        "gt",
+        "lt",
+        "eq",
+        "eqeq",
+        "eqstr",
+        "eqeqstr",
+        "null",
+        "eqnull",
+        "bool",
+        "eqbool",
+        "date",
+        "eqdate",
+    ],
+)
 def test_parse_filter(val, exp):
     ''' test a sqlalchemy filter parse '''
     f = _make_filter(val)
@@ -72,12 +90,41 @@ def test_query(session):
     assert len(res) > 0 and len(res) < 20
 
 
-@pytest.mark.parametrize('val, exp',
-                         [('modela.dates > 2020-01-01', 0),
-                          ('modela.dates < 2020-01-01', 20),
-                          ('modela.nulls == NULL', 20),
-                          ('modela.nulls != Null', 0)],
-                         ids=['gtdate', 'ltdate', 'eqnull', 'neqnull'])
+@pytest.mark.parametrize(
+    "val, exp",
+    [
+        ("modela.dates > 2020-01-01", 0),
+        ("modela.dates < 2020-01-01", 20),
+        ("modela.dates < 2020-01-01T00:00:00", 20),
+        ("modela.dates < 2020-01-01T00:00", 20),
+        ("modela.nulls == NULL", 20),
+        ("modela.nulls != Null", 0),
+        ('modela.bools = True" ', 20),
+        ('modela.bools = t" ', 20),
+        ('modela.bools = 1" ', 20),
+        ('modela.bools = yes" ', 20),
+        ('modela.bools != False" ', 20),
+        ('modela.bools != f" ', 20),
+        ('modela.bools != 0" ', 20),
+        ('modela.bools != no" ', 20),
+    ],
+    ids=[
+        "gtdate",
+        "ltdate",
+        "ltdateiso_a",
+        "ltdateiso_b",
+        "eqnull",
+        "neqnull",
+        "bool",
+        "bool_a",
+        "bool_b",
+        "bool_c",
+        "nebool",
+        "nebool_a",
+        "nebool_b",
+        "nebool_c",
+    ],
+)
 def test_query_with_filter(session, val, exp):
     ''' test a query with a parsed filter '''
     f = _make_filter(val)
