@@ -281,6 +281,25 @@ class SQLAMixin(object):
 
 
     def _to_bool(self, value):
+        """ Cast value to Boolean.
+
+        Parameters:
+            value (str):
+                The value to format
+
+        Returns:
+            True from inputs:
+              - "true"
+              - "t"
+              - "1"
+              - "yes"
+
+            False from inputs:
+              - "false"
+              - "f"
+              - "0"
+              - "no"
+        """
         valid = {
             "true": True,
             "t": True,
@@ -296,7 +315,7 @@ class SQLAMixin(object):
             return value
 
         if not isinstance(value, str):
-            raise ValueError("Invalid literal for boolean. Not a string.")
+            raise ValueError("Invalid literal for boolean. Not a string or boolean.")
 
         lower_value = value.lower()
         if lower_value in valid:
