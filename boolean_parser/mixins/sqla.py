@@ -229,7 +229,7 @@ class SQLAMixin(object):
         lower_value_2 = None
 
         # get python field type
-        ftypes = [float, bool, int, decimal.Decimal]
+        ftypes = [float, bool, int, decimal.Decimal, date, datetime]
         fieldtype = field.type.python_type
 
         # format the values
@@ -271,7 +271,9 @@ class SQLAMixin(object):
             out_value = self._cast_value(value, datatype=int)
         elif fieldtype == bool:
             out_value = self._cast_value(value, datatype=bool)
-        elif fieldtype == datetime or fieldtype == date:
+        elif fieldtype == date:
+            out_value = self._cast_value(value, datatype=date)
+        elif fieldtype == datetime:
             out_value = self._cast_value(value, datatype=datetime)
         else:
             lower_field = func.lower(field)
@@ -325,6 +327,33 @@ class SQLAMixin(object):
             raise ValueError('Invalid literal for boolean: "%s"' % value)
 
 
+    def _to_date(self, value):
+        """ Cast value to Datetime.
+
+        Parameters:
+            value (str):
+                The value to format. Should be an ISO 8601 date string
+                such as '2011-11-04' or '2011-11-04T00:05:23'
+
+        Returns:
+            The value as an date object
+        """
+
+        if isinstance(value, date):
+            return value
+
+        if not isinstance(value, str):
+            raise ValueError("Invalid literal for date. Not a string or date.")
+
+        try:
+            # When casting to date, we don't care about time, so only take
+            # the first 10 characters of the string
+            dt = date.fromisoformat(value[:10])
+            return dt
+        except ValueError:
+            raise ValueError('Could not parse date from string: "%s"' % value)
+
+
     def _to_datetime(self, value):
         """ Cast value to Datetime.
 
@@ -334,7 +363,7 @@ class SQLAMixin(object):
                 such as '2011-11-04' or '2011-11-04T00:05:23'
 
         Returns:
-            The value as an object of type datetime
+            The value as a datetime object
         """
 
         if isinstance(value, datetime):
@@ -343,19 +372,18 @@ class SQLAMixin(object):
         if not isinstance(value, str):
             raise ValueError("Invalid literal for datetime. Not a string or datetime.")
 
-        # try:
-        dt = datetime.fromisoformat(value)
-        return dt
-        # except ValueError:
-        #     raise ValueError('Could not parse datetime from string: "%s"' % value)
-
+        try:
+            dt = datetime.fromisoformat(value)
+            return dt
+        except ValueError:
+            raise ValueError('Could not parse datetime from string: "%s"' % value)
 
 
     def _cast_value(self, value, datatype=float):
         ''' Cast a value to a specific Python type
 
         Parameters:
-            value (int|float|bool|datetime):
+            value (int|float|bool|date|datetime):
                 A numeric value to cast to a float or integer
             datatype (object):
                 The cast function. Can be either float, int or bool
@@ -364,12 +392,14 @@ class SQLAMixin(object):
             The value explicitly cast to an integer, float, boolean or datetime
         '''
 
-        assert datatype in [float, int, bool, datetime], 'datatype must be either float, int or bool'
+        assert datatype in [float, int, bool, date, datetime], 'datatype must be either float, int or bool'
         try:
             if value.lower() == 'null':
                 out = 'null'
             elif datatype == bool:
                 out = self._to_bool(value)
+            elif datatype == date:
+                out = self._to_date(value)
             elif datatype == datetime:
                 out = self._to_datetime(value)
             else:
