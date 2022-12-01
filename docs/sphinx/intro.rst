@@ -295,6 +295,18 @@ expresssion.
      - bitwise | (or)
      - table.x | 5
      - table.x.op(|)(5) > 0
+   * - =
+     - is a boolean
+     - table.x = True
+     - table.x = true
+   * - =
+     - is a date object
+     - table.x = 2020-01-01
+     - table.x = "2020-01-01"
+   * - ==
+     - is a datetime object
+     - table.x == 2020-01-01T00:00:00
+     - table.x == "2020-01-01 00:00:00"
 
 
 Building a Custom Parser

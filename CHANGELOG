@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+[0.1.4] - 2022-12-01
+--------------------
+- :pr:`9` - Adds support for booleans, dates, and datetimes
+- Fixes :issue:`10` - no boolean support
+- :pr:`8` - Updates docs and tests
+
 [0.1.3] - 2022-04-04
 --------------------
 - :pr:`6` - Adds null and date options, fixes ilike, like operators
