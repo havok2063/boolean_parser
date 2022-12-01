@@ -11,15 +11,19 @@
 # Modified By: Brian Cherinka
 
 
-from __future__ import print_function, division, absolute_import
-import inspect
+from __future__ import absolute_import, division, print_function
+
 import decimal
-from sqlalchemy import func, bindparam
+import inspect
+from datetime import date, datetime
+from operator import eq, ge, gt, le, lt, ne
+
+from sqlalchemy import bindparam, func
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import DeclarativeMeta
 from sqlalchemy.orm.util import AliasedClass
-from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql import sqltypes, between
-from operator import le, ge, gt, lt, eq, ne
+from sqlalchemy.sql import between, sqltypes
+
 from boolean_parser.parsers.base import BooleanParserException
 
 
@@ -225,7 +229,7 @@ class SQLAMixin(object):
         lower_value_2 = None
 
         # get python field type
-        ftypes = [float, int, decimal.Decimal]
+        ftypes = [float, bool, int, decimal.Decimal, date, datetime]
         fieldtype = field.type.python_type
 
         # format the values
@@ -245,7 +249,7 @@ class SQLAMixin(object):
     def _format_value(self, value, fieldtype, field):
         ''' Formats the value based on the fieldtype
 
-        Formats the value to proper numreical type and lowercases
+        Formats the value to proper numerical type and lowercases
         the field for string fields.
 
         Parameters:
@@ -265,33 +269,144 @@ class SQLAMixin(object):
             out_value = self._cast_value(value, datatype=float)
         elif fieldtype == int:
             out_value = self._cast_value(value, datatype=int)
+        elif fieldtype == bool:
+            out_value = self._cast_value(value, datatype=bool)
+        elif fieldtype == date:
+            out_value = self._cast_value(value, datatype=date)
+        elif fieldtype == datetime:
+            out_value = self._cast_value(value, datatype=datetime)
         else:
             lower_field = func.lower(field)
             out_value = value
 
         return out_value, lower_field
 
+
+    def _to_bool(self, value):
+        """ Cast value to Boolean.
+
+        Parameters:
+            value (str):
+                The value to format
+
+        Returns:
+            True from inputs:
+              - "true"
+              - "t"
+              - "1"
+              - "yes"
+
+            False from inputs:
+              - "false"
+              - "f"
+              - "0"
+              - "no"
+        """
+        valid = {
+            "true": True,
+            "t": True,
+            "1": True,
+            "yes": True,
+            "false": False,
+            "f": False,
+            "0": False,
+            "no": False,
+        }
+
+        if isinstance(value, bool):
+            return value
+
+        if not isinstance(value, str):
+            raise ValueError("Invalid literal for boolean. Not a string or boolean.")
+
+        lower_value = value.lower()
+        if lower_value in valid:
+            return valid[lower_value]
+
+        else:
+            raise ValueError('Invalid literal for boolean: "%s"' % value)
+
+
+    def _to_date(self, value):
+        """ Cast value to Datetime.
+
+        Parameters:
+            value (str):
+                The value to format. Should be an ISO 8601 date string
+                such as '2011-11-04' or '2011-11-04T00:05:23'
+
+        Returns:
+            The value as an date object
+        """
+
+        if isinstance(value, date):
+            return value
+
+        if not isinstance(value, str):
+            raise ValueError("Invalid literal for date. Not a string or date.")
+
+        try:
+            # When casting to date, we don't care about time, so only take
+            # the first 10 characters of the string
+            dt = date.fromisoformat(value[:10])
+            return dt
+        except ValueError:
+            raise ValueError('Could not parse date from string: "%s"' % value)
+
+
+    def _to_datetime(self, value):
+        """ Cast value to Datetime.
+
+        Parameters:
+            value (str):
+                The value to format. Should be an ISO 8601 date string
+                such as '2011-11-04' or '2011-11-04T00:05:23'
+
+        Returns:
+            The value as a datetime object
+        """
+
+        if isinstance(value, datetime):
+            return value
+
+        if not isinstance(value, str):
+            raise ValueError("Invalid literal for datetime. Not a string or datetime.")
+
+        try:
+            dt = datetime.fromisoformat(value)
+            return dt
+        except ValueError:
+            raise ValueError('Could not parse datetime from string: "%s"' % value)
+
+
     def _cast_value(self, value, datatype=float):
         ''' Cast a value to a specific Python type
 
         Parameters:
-            value (int|float):
+            value (int|float|bool|date|datetime):
                 A numeric value to cast to a float or integer
             datatype (object):
-                The numeric cast function.  Can be either float or int.
+                The cast function. Can be either float, int or bool
 
         Returns:
-            The value explicitly cast to an integer or float
+            The value explicitly cast to an integer, float, boolean or datetime
         '''
 
-        assert datatype in [float, int], 'datatype must be either float or int'
+        assert datatype in [float, int, bool, date, datetime], 'datatype must be either float, int or bool'
         try:
             if value.lower() == 'null':
                 out = 'null'
+            elif datatype == bool:
+                out = self._to_bool(value)
+            elif datatype == date:
+                out = self._to_date(value)
+            elif datatype == datetime:
+                out = self._to_datetime(value)
             else:
                 out = datatype(value)
         except (ValueError, SyntaxError):
-            raise BooleanParserException(f'Field {self.name} expects a {datatype.__name__} value.  Received {value} instead.')
+            raise BooleanParserException(f'Field {self.name} expects a {datatype.__name__} value. Received {value} instead.')
         else:
             return out
+
 
