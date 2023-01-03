@@ -32,7 +32,7 @@ def _make_filter(value):
         ("modela.x < 5", "modela.x < 5"),
         ("modela.x = 5", "modela.x = 5"),
         ("modela.x == 5", "modela.x = 5"),
-        ("modela.name = Some_string", "lower(lower(modela.name)) LIKE lower('%' || 'Some_string' || '%')",),
+        ("modela.name = Some_string", "lower(lower(modela.name)) LIKE lower('%Some_string%')",),
         ('modela.name == "Some_string"', "lower(modela.name) = lower('Some_string')"),
         ("modela.name = null", "modela.name IS NULL"),
         ("modela.name == null", "modela.name IS NULL"),
