@@ -199,9 +199,9 @@ class SQLAMixin(object):
                 # x=*5  ->  x LIKE '%5'  (x ends with 5)
                 elif value.find('*') >= 0:
                     value = value.replace('*', '%')
-                    condition = lower_field.ilike(bindparam(self.fullname, value))
+                    condition = lower_field.ilike(value)
                 else:
-                    condition = lower_field.ilike('%' + bindparam(self.fullname, value) + '%')
+                    condition = lower_field.ilike('%' + value + '%')
             # For all other types, assume straight equality
             else:
                 field = getattr(model, self.name)
